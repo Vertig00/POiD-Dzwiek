@@ -3,35 +3,46 @@ package kosodrzewina.view;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-
+import java.io.InputStream;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
-
 import kosodrzewina.implementation.FileLoader;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.Line;
-import javax.sound.sampled.LineEvent;
-import javax.sound.sampled.LineListener;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import kosodrzewina.implementation.FileSaver;
+import kosodrzewina.model.Sound;
+import sun.audio.AudioStream;
+import javax.sound.sampled.*;
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.JSpinner;
 
-public class MainView implements ActionListener{
+public class MainView implements ActionListener, ChangeListener{
 
 	private JFrame frame;
 	JMenuItem loadFile;
 	JMenuItem closeApp;
 	private JButton btnPlay;
+	JButton saveSound;
+	JLabel fileName;
+	JLabel filePath;
+	JSlider volume;
+	JSpinner volumeValue;
+	InputStream in;
+	AudioStream audios = null;
+	Sound sound;
+	
+	byte[] soundTab = null;
 	
     AudioInputStream stream;
     AudioFormat format;
@@ -88,9 +99,38 @@ public class MainView implements ActionListener{
 		frame.getContentPane().setLayout(null);
 		
 		btnPlay = new JButton("Play");
+		btnPlay.setEnabled(false);
 		btnPlay.addActionListener(this);
-		btnPlay.setBounds(135, 69, 174, 96);
+		btnPlay.setBounds(119, 74, 200, 92);
 		frame.getContentPane().add(btnPlay);
+		
+		JLabel lblWczytano = new JLabel("Wczytano: ");
+		lblWczytano.setBounds(10, 11, 68, 14);
+		frame.getContentPane().add(lblWczytano);
+		
+		fileName = new JLabel("");
+		fileName.setBounds(77, 11, 75, 14);
+		frame.getContentPane().add(fileName);
+		
+		filePath = new JLabel("");
+		filePath.setBounds(162, 11, 262, 14);
+		frame.getContentPane().add(filePath);
+		
+		volume = new JSlider();
+		volume.setBounds(119, 203, 200, 26);
+		volume.addChangeListener(this);
+		frame.getContentPane().add(volume);
+		
+		volumeValue = new JSpinner();
+		volumeValue.setValue(volume.getValue());
+		volumeValue.addChangeListener(this);
+		volumeValue.setBounds(329, 203, 40, 26);
+		frame.getContentPane().add(volumeValue);
+		
+		saveSound = new JButton("Zapisz");
+		saveSound.addActionListener(this);
+		saveSound.setBounds(329, 143, 89, 23);
+		frame.getContentPane().add(saveSound);
 	}
 
 	@Override
@@ -99,40 +139,68 @@ public class MainView implements ActionListener{
 		if(z == loadFile){
 			FileLoader fl = new FileLoader();
 			File file = fl.fileOpener();
-
-//
+			fileName.setText(file.getName());
+			filePath.setText(file.getPath());
 			try {
 				stream = AudioSystem.getAudioInputStream(file);
-			} catch (UnsupportedAudioFileException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		    format = stream.getFormat();
-		    info = new DataLine.Info(Clip.class, format);
-		    try {
-				clip = (Clip) AudioSystem.getLine(info);
-			} catch (LineUnavailableException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				AudioInputStream stream2 = AudioSystem.getAudioInputStream(file);
+			    format = stream.getFormat();
+			    System.out.println(format);
+			    info = new DataLine.Info(Clip.class, format);
+			    clip = (Clip) AudioSystem.getLine(info);
+			    clip.open(stream);
+//				soundTab = readSound(stream2);
+				sound = new Sound(readSound(stream2), format.isBigEndian(), format.getChannels(), 
+								  format.getEncoding(), format.getFrameRate(), format.getSampleSizeInBits());
+			    btnPlay.setEnabled(true);
+			} catch (Exception e1) {
+				JOptionPane.showMessageDialog(null, e1);
 			}
 		}else if(z == closeApp){
+			clip.close();
 			System.exit(0);
 		}else if(z == btnPlay){
-		    try
-		    {
-		        clip.open(stream);
-		        clip.start();
-		    }
-		    catch (Exception exc)
-		    {
-		        exc.printStackTrace(System.out);
-		    }
-
+			clip.stop();
+			clip.setMicrosecondPosition(0);
+			clip.start();
+		}else if(z == saveSound){
+			FileSaver.SaveSoundFile(sound);
 		}
-		
 	}
 
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		Object z = e.getSource();
+		
+		if(z == volume){
+			volumeValue.setValue(volume.getValue());
+		}else if(z == volumeValue){
+			Integer val = (Integer) volumeValue.getValue();
+			if(val > 100)		volumeValue.setValue(100);
+			else if(val < 0) 	volumeValue.setValue(0);
+			volume.setValue((int) volumeValue.getValue());
+		}
+	}
+	
+	public byte[] readSound( AudioInputStream stream){
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		BufferedInputStream in = new BufferedInputStream(stream);
+
+		int read;
+		byte[] tab = null;
+		byte[] buff = new byte[1024];
+		try {
+			while ((read = in.read(buff)) > 0)
+			{
+			    out.write(buff, 0, read);
+			}
+			out.flush();
+			tab = out.toByteArray();
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e);
+			e.printStackTrace();
+		}
+		return tab;
+	}
+	
 }

@@ -1,8 +1,6 @@
 package kosodrzewina.implementation;
 
 import java.io.File;
-import java.io.IOException;
-
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -35,7 +33,6 @@ public class FileLoader {
 		File file = null;
 		if(jf.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
 			file = jf.getSelectedFile();
-			
 		}
 		return file;
 	}
