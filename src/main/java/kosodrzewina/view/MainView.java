@@ -133,7 +133,6 @@ public class MainView implements ActionListener, ChangeListener{
 		frame.getContentPane().add(saveSound);
 	}
 
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object z = e.getSource();
 		if(z == loadFile){
@@ -168,7 +167,6 @@ public class MainView implements ActionListener, ChangeListener{
 		}
 	}
 
-	@Override
 	public void stateChanged(ChangeEvent e) {
 		Object z = e.getSource();
 		
@@ -178,7 +176,7 @@ public class MainView implements ActionListener, ChangeListener{
 			Integer val = (Integer) volumeValue.getValue();
 			if(val > 100)		volumeValue.setValue(100);
 			else if(val < 0) 	volumeValue.setValue(0);
-			volume.setValue((int) volumeValue.getValue());
+			volume.setValue( (Integer) volumeValue.getValue());
 		}
 	}
 	
