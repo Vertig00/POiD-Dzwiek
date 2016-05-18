@@ -7,7 +7,6 @@ public class Sound {
 	private int validBits;
 	private long sampleRate;
 	
-	
 	public double[][] getFrames() {
 		return frames;
 	}
