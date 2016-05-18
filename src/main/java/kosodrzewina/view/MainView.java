@@ -26,9 +26,18 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
+
 import WavFile.WavFile;
 
 import javax.swing.JSpinner;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
 
 public class MainView implements ActionListener, ChangeListener{
 
@@ -44,6 +53,7 @@ public class MainView implements ActionListener, ChangeListener{
 	InputStream in;
 	AudioStream audios = null;
 	Sound sound;
+	JLabel soundChart;
 	
 	byte[] soundTab = null;
 	
@@ -80,7 +90,7 @@ public class MainView implements ActionListener, ChangeListener{
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
+		frame.setBounds(100, 100, 733, 564);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -104,7 +114,7 @@ public class MainView implements ActionListener, ChangeListener{
 		btnPlay = new JButton("Play");
 		btnPlay.setEnabled(false);
 		btnPlay.addActionListener(this);
-		btnPlay.setBounds(119, 74, 200, 92);
+		btnPlay.setBounds(10, 52, 200, 92);
 		frame.getContentPane().add(btnPlay);
 		
 		JLabel lblWczytano = new JLabel("Wczytano: ");
@@ -112,28 +122,33 @@ public class MainView implements ActionListener, ChangeListener{
 		frame.getContentPane().add(lblWczytano);
 		
 		fileName = new JLabel("");
-		fileName.setBounds(77, 11, 75, 14);
+		fileName.setBounds(77, 11, 112, 14);
 		frame.getContentPane().add(fileName);
 		
 		filePath = new JLabel("");
-		filePath.setBounds(162, 11, 262, 14);
+		filePath.setBounds(199, 11, 467, 14);
 		frame.getContentPane().add(filePath);
 		
 		volume = new JSlider();
-		volume.setBounds(119, 203, 200, 26);
+		volume.setBounds(10, 155, 200, 26);
 		volume.addChangeListener(this);
 		frame.getContentPane().add(volume);
 		
 		volumeValue = new JSpinner();
 		volumeValue.setValue(volume.getValue());
 		volumeValue.addChangeListener(this);
-		volumeValue.setBounds(329, 203, 40, 26);
+		volumeValue.setBounds(220, 155, 40, 26);
 		frame.getContentPane().add(volumeValue);
 		
 		saveSound = new JButton("Zapisz");
 		saveSound.addActionListener(this);
-		saveSound.setBounds(329, 143, 89, 23);
+		saveSound.setBounds(220, 52, 89, 23);
 		frame.getContentPane().add(saveSound);
+		
+		soundChart = new JLabel("");
+		soundChart.setBorder(new LineBorder(new Color(0, 0, 0)));
+		soundChart.setBounds(10, 213, 697, 280);
+		frame.getContentPane().add(soundChart);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -205,6 +220,12 @@ public class MainView implements ActionListener, ChangeListener{
 		        		 		  , min, max);
 		         System.out.println(sound.toString());
 //		         System.out.printf("Min: %f, Max: %f\n", min, max);
+		         double[][] cos = new double[2][2];
+		         cos[0][0] = 2;
+		         cos[0][1] = 3;
+		         cos[1][0] = -2;
+		         cos[1][1] = 5;
+		         makeChart(frame, "Wykres", cos);
 		      }
 		      catch (Exception exc)
 		      {
@@ -258,4 +279,27 @@ public class MainView implements ActionListener, ChangeListener{
 		return tab;
 	}
 	
+	private void makeChart(JFrame frame, String name, double[][] tab) {
+
+		DefaultCategoryDataset data = new DefaultCategoryDataset();
+		
+		data.setValue(tab[0][0], "a", "b");
+		data.setValue(tab[0][1], "a", "b");
+		data.setValue(tab[1][0], "a", "b");
+		data.setValue(tab[1][1], "a", "b");
+		CategoryDataset dataset = data;
+		//trzeba jakos wype³ni ten dataset
+		JFreeChart loadImageChart = ChartFactory.createBarChart(name, "cat x", "val y",
+				dataset, PlotOrientation.VERTICAL, true, true, true);
+		
+		ChartPanel loadChartPanel = new ChartPanel(loadImageChart);
+		loadChartPanel.setBounds(soundChart.getX(), soundChart.getY(), soundChart.getWidth(), soundChart.getHeight());
+		frame.getContentPane().add(loadChartPanel, soundChart);
+		
+//		if(loadChartPanelLeft!=null)
+//			frame.getContentPane().remove(loadChartPanelLeft);
+//		loadChartPanelLeft = loadChartPanel;
+//		frame.getContentPane().add(loadChartPanelLeft);
+		
+	}
 }
