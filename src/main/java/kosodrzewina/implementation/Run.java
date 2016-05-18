@@ -14,10 +14,11 @@ public class Run {
 		String path2 = "sounds/seq/DWK_violin.wav";
 		File file = new File(path2);
 
+		// Read
 		Sound sound = readWav(file);
-		
 		sound.info();
 		
+		// Save
 		String pathOut2 = "sounds/seq/Violinno.wav";
 		File fileOut = new File(pathOut2);
 		saveWav(sound, fileOut);
