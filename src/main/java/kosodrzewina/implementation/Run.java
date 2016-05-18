@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import WavFile.WavFile;
 import WavFile.WavFileException;
+import kosodrzewina.model.Sound;
 
 public class Run {
 
@@ -12,29 +13,15 @@ public class Run {
 		String path1 = "src/main/resources/TestWav/i.wav";
 		String path2 = "sounds/seq/DWK_violin.wav";
 		File file = new File(path2);
-		
-		
-		try {
-			// Open .wav
-			WavFile wf = WavFile.openWavFile(file);
-			wf.display();
-			
-			// Read frames
-			int size = 1024;
-			int channelsNum = wf.getNumChannels();
-			double a[] = new double[size*channelsNum];
-			wf.readFrames(a, size);
-			outDoubles(a);
-			
-			wf.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (WavFileException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
+		Sound sound = readWav(file);
+		
+		sound.info();
+		
+		String pathOut2 = "sounds/seq/Violinno.wav";
+		File fileOut = new File(pathOut2);
+		saveWav(sound, fileOut);
+		
 	}
 	
 	private static void outDoubles(double tab[]) {
@@ -44,6 +31,67 @@ public class Run {
 		}
 		System.out.println("Tab:end");
 		System.out.println("");
+	}
+	
+	private static Sound readWav(File file) {
+		Sound sound = new Sound();
+		try {
+			
+			// Open .wav
+			WavFile wf = WavFile.openWavFile(file);
+			wf.display();
+			System.out.println("");
+			
+			// Save parameters
+			sound.setNumChannels( wf.getNumChannels() );
+			sound.setValidBits( wf.getValidBits() );
+			sound.setSampleRate( wf.getSampleRate() );
+			
+			// Save sound/all frames
+			double[][] frames = new double[sound.getNumChannels()][(int) wf.getNumFrames()];
+			wf.readFrames(frames, (int) wf.getNumFrames());
+			sound.setFrames(frames);
+			
+			// Close WavFile
+			wf.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (WavFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return sound;
+	}
+	
+	private static void saveWav(Sound sound, File file) {
+		try {
+			// Create new .wav
+			WavFile wf = WavFile.newWavFile(file, 
+					sound.getNumChannels(), 
+					sound.getNumFrames(), 
+					sound.getValidBits(), 
+					sound.getSampleRate()
+					);
+			
+			// Write Frames
+			wf.writeFrames(sound.getFrames(), 
+					sound.getFrames()[0].length
+					);
+			
+			// Close WavFile
+			wf.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (WavFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
