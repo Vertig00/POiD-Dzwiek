@@ -24,6 +24,13 @@
 			<artifactId>jtransforms</artifactId>
 			<version>2.4.0</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>jfreechart</groupId>
+			<artifactId>jfreechart</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		
 
 	</dependencies>
   
