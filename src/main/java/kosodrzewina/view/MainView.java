@@ -3,12 +3,15 @@ package kosodrzewina.view;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.StringTokenizer;
+
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -52,8 +55,9 @@ public class MainView implements ActionListener, ChangeListener{
 	JSpinner volumeValue;
 	InputStream in;
 	AudioStream audios = null;
-	Sound sound;
-	JLabel soundChart;
+	Sound sound;;
+	ChartPanel loadChartPanelLeft;
+	JFreeChart loadImageChart;
 	
 	byte[] soundTab = null;
 	
@@ -145,10 +149,10 @@ public class MainView implements ActionListener, ChangeListener{
 		saveSound.setBounds(220, 52, 89, 23);
 		frame.getContentPane().add(saveSound);
 		
-		soundChart = new JLabel("");
-		soundChart.setBorder(new LineBorder(new Color(0, 0, 0)));
-		soundChart.setBounds(10, 213, 697, 280);
-		frame.getContentPane().add(soundChart);
+		loadChartPanelLeft = new ChartPanel(loadImageChart);
+		loadChartPanelLeft.setBorder(new LineBorder(new Color(0, 0, 0)));
+		loadChartPanelLeft.setBounds(10, 213, 697, 280);
+		frame.getContentPane().add(loadChartPanelLeft);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -157,12 +161,7 @@ public class MainView implements ActionListener, ChangeListener{
 			FileLoader fl = new FileLoader();
 			File file = fl.fileOpener();
 			fileName.setText(file.getName());
-			try {
-				filePath.setText(file.getCanonicalPath().toString());
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			filePath.setText(getPath(file.getAbsolutePath()));
 //			try {
 //				stream = AudioSystem.getAudioInputStream(file);
 //				AudioInputStream stream2 = AudioSystem.getAudioInputStream(file);
@@ -226,6 +225,7 @@ public class MainView implements ActionListener, ChangeListener{
 		         cos[1][0] = -2;
 		         cos[1][1] = 5;
 		         makeChart(frame, "Wykres", cos);
+		         loadChartPanelLeft.updateUI();
 		      }
 		      catch (Exception exc)
 		      {
@@ -289,17 +289,43 @@ public class MainView implements ActionListener, ChangeListener{
 		data.setValue(tab[1][1], "a", "b");
 		CategoryDataset dataset = data;
 		//trzeba jakos wype³ni ten dataset
-		JFreeChart loadImageChart = ChartFactory.createBarChart(name, "cat x", "val y",
+		loadImageChart = ChartFactory.createBarChart(name, "cat x", "val y",
 				dataset, PlotOrientation.VERTICAL, true, true, true);
 		
 		ChartPanel loadChartPanel = new ChartPanel(loadImageChart);
-		loadChartPanel.setBounds(soundChart.getX(), soundChart.getY(), soundChart.getWidth(), soundChart.getHeight());
-		frame.getContentPane().add(loadChartPanel, soundChart);
+		loadChartPanel.setBounds(loadChartPanelLeft.getX(), loadChartPanelLeft.getY(), loadChartPanelLeft.getWidth(), loadChartPanelLeft.getHeight());
+		frame.getContentPane().add(loadChartPanel, loadChartPanelLeft);
 		
-//		if(loadChartPanelLeft!=null)
-//			frame.getContentPane().remove(loadChartPanelLeft);
-//		loadChartPanelLeft = loadChartPanel;
-//		frame.getContentPane().add(loadChartPanelLeft);
+		if(loadChartPanelLeft!=null)
+			frame.getContentPane().remove(loadChartPanelLeft);
+		loadChartPanelLeft = loadChartPanel;
+		frame.getContentPane().add(loadChartPanelLeft);
 		
+	}
+	
+	public String getPath(String path){
+		String endPath = "";
+		StringTokenizer token = new StringTokenizer(path, "\\");
+		String[] tab = new String[token.countTokens()];
+		int p = 0;
+		while (token.hasMoreTokens()) {
+			tab[p] = token.nextToken();
+			p++;
+		}
+
+		for(int i = 0; i < tab.length; i++){
+			if(!tab[i].equals("sounds")){
+				tab[i] = "";
+			}else{
+				break;
+			}
+		}
+		for (String string : tab) {
+			if(!string.equals("")){
+				endPath += string + "\\";
+			}
+		}
+		
+		return endPath.substring(0, endPath.length()-1);
 	}
 }
