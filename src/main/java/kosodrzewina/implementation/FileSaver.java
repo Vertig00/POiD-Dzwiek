@@ -36,38 +36,6 @@ public class FileSaver {
 //		}
 //	}
 	
-	public static void saveSoundFile(Sound s){
-		File file = new File(destination + name);
-	      try
-	      {	         // Create a wav file with the name specified as the first argument
-	         WavFile wavFile = WavFile.newWavFile(file, 
-	        		 							  s.getChannels(),
-	        		 							  (long) s.getFrameRate(),
-	        		 							  s.getSampleSizeInBits(),
-	        		 							  (long) s.getFrameRate());
-	         // Create a buffer of 100 frames
-	         double[] buffer = new double[100];
-
-	         // Initialise a local frame counter
-	         long frameCounter = 0;
-
-	         // Loop until all frames written
-	         while (frameCounter < s.getFrameRate())
-	         {
-	            // Determine how many frames to write, up to a maximum of the buffer size
-	            long remaining = wavFile.getFramesRemaining();
-	            int toWrite = (remaining > 100) ? 100 : (int) remaining;
-
-
-	            // Write the buffer
-	            wavFile.writeFrames(s.getSoundTab(), toWrite);
-	         }
-	         wavFile.close();
-	      }
-	      catch (Exception e)
-	      {
-	         System.err.println(e);
-	      }
-	}
+	
 		
 }

@@ -214,9 +214,6 @@ public class MainView implements ActionListener, ChangeListener{
 
 		         // Close the wavFile
 		         wavFile.close();
-		         sound = new Sound(buffer, wavFile.getNumChannels()
-		        		 		  , wavFile.getNumFrames(), wavFile.getValidBits()
-		        		 		  , min, max);
 		         System.out.println(sound.toString());
 //		         System.out.printf("Min: %f, Max: %f\n", min, max);
 		         double[][] cos = new double[2][2];
@@ -240,7 +237,7 @@ public class MainView implements ActionListener, ChangeListener{
 			clip.setMicrosecondPosition(0);
 			clip.start();
 		}else if(z == saveSound){
-			FileSaver.saveSoundFile(sound);
+//			FileSaver.saveSoundFile(sound);
 		}
 	}
 
