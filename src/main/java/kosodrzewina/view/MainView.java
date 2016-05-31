@@ -20,8 +20,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import kosodrzewina.implementation.FileLoader;
 import kosodrzewina.implementation.FileSaver;
+import kosodrzewina.implementation.Methods;
 import kosodrzewina.model.Sound;
 import sun.audio.AudioStream;
+
+import javax.sound.midi.MetaEventListener;
 import javax.sound.sampled.*;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -41,8 +44,10 @@ import WavFile.WavFile;
 import javax.swing.JSpinner;
 import javax.swing.border.LineBorder;
 import java.awt.Color;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
 
-public class MainView implements ActionListener, ChangeListener{
+public class MainView implements ActionListener{
 
 	private JFrame frame;
 	JMenuItem loadFile;
@@ -51,24 +56,24 @@ public class MainView implements ActionListener, ChangeListener{
 	JButton saveSound;
 	JLabel fileName;
 	JLabel filePath;
-	JSlider volume;
-	JSpinner volumeValue;
 	InputStream in;
-	AudioStream audios = null;
 	Sound sound;;
 	ChartPanel loadChartPanelLeft;
 	JFreeChart loadImageChart;
+	JComboBox<String> options;
+	JLabel frequencyLabel;
+	JButton doIt;
 	
 	byte[] soundTab = null;
+	String[] optionTab = {"zero-crossing","Upelszone zero-crossing","Widmo Fouriera"};
 	
     AudioInputStream stream;
     AudioFormat format;
     DataLine.Info info;
     Clip clip;
+    private JTextField dokl;
 
-	/**
-	 * Launch the application.
-	 */
+
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -82,16 +87,10 @@ public class MainView implements ActionListener, ChangeListener{
 		});
 	}
 
-	/**
-	 * Create the application.
-	 */
 	public MainView() {
 		initialize();
 	}
 
-	/**
-	 * Initialize the contents of the frame.
-	 */
 	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 733, 564);
@@ -118,7 +117,7 @@ public class MainView implements ActionListener, ChangeListener{
 		btnPlay = new JButton("Play");
 		btnPlay.setEnabled(false);
 		btnPlay.addActionListener(this);
-		btnPlay.setBounds(10, 52, 200, 92);
+		btnPlay.setBounds(10, 36, 200, 92);
 		frame.getContentPane().add(btnPlay);
 		
 		JLabel lblWczytano = new JLabel("Wczytano: ");
@@ -133,26 +132,45 @@ public class MainView implements ActionListener, ChangeListener{
 		filePath.setBounds(199, 11, 467, 14);
 		frame.getContentPane().add(filePath);
 		
-		volume = new JSlider();
-		volume.setBounds(10, 155, 200, 26);
-		volume.addChangeListener(this);
-		frame.getContentPane().add(volume);
-		
-		volumeValue = new JSpinner();
-		volumeValue.setValue(volume.getValue());
-		volumeValue.addChangeListener(this);
-		volumeValue.setBounds(220, 155, 40, 26);
-		frame.getContentPane().add(volumeValue);
-		
 		saveSound = new JButton("Zapisz");
 		saveSound.addActionListener(this);
-		saveSound.setBounds(220, 52, 89, 23);
+		saveSound.setBounds(10, 137, 89, 23);
 		frame.getContentPane().add(saveSound);
 		
 		loadChartPanelLeft = new ChartPanel(loadImageChart);
 		loadChartPanelLeft.setBorder(new LineBorder(new Color(0, 0, 0)));
 		loadChartPanelLeft.setBounds(10, 213, 697, 280);
 		frame.getContentPane().add(loadChartPanelLeft);
+		
+		JLabel lblWybierzOpcje = new JLabel("Wybierz opcje");
+		lblWybierzOpcje.setBounds(220, 37, 105, 14);
+		frame.getContentPane().add(lblWybierzOpcje);
+		
+		options = new JComboBox<String>();
+		for (String string : optionTab) {
+			options.addItem(string);
+		}
+		options.setBounds(335, 36, 171, 20);
+		frame.getContentPane().add(options);
+		
+		doIt = new JButton("Wykonaj");
+		doIt.setEnabled(false);
+		doIt.addActionListener(this);
+		doIt.setBounds(335, 71, 112, 23);
+		frame.getContentPane().add(doIt);
+		
+		JLabel lblWynik = new JLabel("Wynik: ");
+		lblWynik.setBounds(220, 114, 105, 14);
+		frame.getContentPane().add(lblWynik);
+		
+		frequencyLabel = new JLabel("");
+		frequencyLabel.setBounds(335, 114, 112, 14);
+		frame.getContentPane().add(frequencyLabel);
+		
+		dokl = new JTextField();
+		dokl.setBounds(220, 72, 86, 20);
+		frame.getContentPane().add(dokl);
+		dokl.setColumns(10);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -161,22 +179,7 @@ public class MainView implements ActionListener, ChangeListener{
 			FileLoader fl = new FileLoader();
 			File file = fl.fileOpener();
 			fileName.setText(file.getName());
-			filePath.setText(getPath(file.getAbsolutePath()));
-//			try {
-//				stream = AudioSystem.getAudioInputStream(file);
-//				AudioInputStream stream2 = AudioSystem.getAudioInputStream(file);
-//			    format = stream.getFormat();
-//			    System.out.println(format);
-//			    info = new DataLine.Info(Clip.class, format);
-//			    clip = (Clip) AudioSystem.getLine(info);
-//			    clip.open(stream);
-////				soundTab = readSound(stream2);
-//				sound = new Sound(readSound(stream2), format.isBigEndian(), format.getChannels(), 
-//								  format.getEncoding(), format.getFrameRate(), format.getSampleSizeInBits());
-//			    btnPlay.setEnabled(true);
-//			} catch (Exception e1) {
-//				JOptionPane.showMessageDialog(null, e1);
-//			}
+			filePath.setText(FileLoader.getPath(file.getAbsolutePath()));
 			try{
 				stream = AudioSystem.getAudioInputStream(file);
 			    format = stream.getFormat();
@@ -184,45 +187,19 @@ public class MainView implements ActionListener, ChangeListener{
 			    clip = (Clip) AudioSystem.getLine(info);
 			    clip.open(stream);
 			    btnPlay.setEnabled(true);
+			    doIt.setEnabled(true);
 				
-				 // Open the wav file specified as the first argument
-		         WavFile wavFile = WavFile.openWavFile(file);
-
-		         // Display information about the wav file
-//		         wavFile.display();
-		         // Get the number of audio channels in the wav file
-		         int numChannels = wavFile.getNumChannels();
-
-		         // Create a buffer of 100 frames
-		         double[] buffer = new double[100 * numChannels];
-		         System.out.println(buffer.length);
-		         int framesRead;
-		         double min = Double.MAX_VALUE;
-		         double max = Double.MIN_VALUE;
-
-		         do
-		         {
-		            // Read frames into buffer
-		            framesRead = wavFile.readFrames(buffer, 100);
-		            // Loop through frames and look for minimum and maximum value
-		            for (int s=0 ; s<framesRead * numChannels ; s++)
-		            {
-		               if (buffer[s] > max) max = buffer[s];
-		               if (buffer[s] < min) min = buffer[s];
-		            }
-		         }while (framesRead != 0);
-
-		         // Close the wavFile
-		         wavFile.close();
-		         System.out.println(sound.toString());
-//		         System.out.printf("Min: %f, Max: %f\n", min, max);
-		         double[][] cos = new double[2][2];
-		         cos[0][0] = 2;
-		         cos[0][1] = 3;
-		         cos[1][0] = -2;
-		         cos[1][1] = 5;
-		         makeChart(frame, "Wykres", cos);
-		         loadChartPanelLeft.updateUI();
+			    sound = FileLoader.readWav(file);
+//			    double[][] cos = sound.getFrames();
+//			    double w = Methods.zeroCrossingLine(sound);
+//			    System.out.println("cos: "+w);
+//			    double[][] forChart = new double[2][cos[0].length];
+//			    for(int i = 0; i < cos[0].length;i++ ){
+//			    	forChart[0][i] = i/cos[0].length;
+//			    	forChart[1][i] = cos[0][i];
+//			    }
+//		        makeChart(frame, "Wykres", forChart);
+//		        loadChartPanelLeft.updateUI();
 		      }
 		      catch (Exception exc)
 		      {
@@ -237,25 +214,22 @@ public class MainView implements ActionListener, ChangeListener{
 			clip.setMicrosecondPosition(0);
 			clip.start();
 		}else if(z == saveSound){
-//			FileSaver.saveSoundFile(sound);
-		}
-	}
-
-	public void stateChanged(ChangeEvent e) {
-		Object z = e.getSource();
-		
-		if(z == volume){
-			volumeValue.setValue(volume.getValue());
-		}else if(z == volumeValue){
-			Integer val = (Integer) volumeValue.getValue();
-			if(val > 100)		volumeValue.setValue(100);
-			else if(val < 0) 	volumeValue.setValue(0);
-			volume.setValue( (Integer) volumeValue.getValue());
+//			FileSaver.saveWav(sound);
+		}else if(z == doIt){
+			if(options.getSelectedIndex() == 0){
+				Double frequency = Methods.zeroCrossingLine(sound);
+				frequencyLabel.setText(frequency.toString()+"Hz");
+			}else if(options.getSelectedIndex() == 1){
+				Double frequency = Methods.zeroCrossingLineUpdated(sound, Double.parseDouble(dokl.getText()));
+				frequencyLabel.setText(frequency.toString()+"Hz");
+			}else{
+				
+			}
 		}
 	}
 	
 	//read sound in byte - to AudioInputStream
-	public byte[] readSound( AudioInputStream stream){
+	public byte[] readSound(AudioInputStream stream){
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		BufferedInputStream in = new BufferedInputStream(stream);
 
@@ -280,13 +254,13 @@ public class MainView implements ActionListener, ChangeListener{
 
 		DefaultCategoryDataset data = new DefaultCategoryDataset();
 		
-		data.setValue(tab[0][0], "a", "b");
-		data.setValue(tab[0][1], "a", "b");
-		data.setValue(tab[1][0], "a", "b");
-		data.setValue(tab[1][1], "a", "b");
+		for(int i = 0 ; i < tab[0].length;i++){
+			data.setValue(tab[0][i], "x", "y");
+			data.setValue(tab[1][i], "x", "y");
+		}
 		CategoryDataset dataset = data;
 		//trzeba jakos wype³ni ten dataset
-		loadImageChart = ChartFactory.createBarChart(name, "cat x", "val y",
+		loadImageChart = ChartFactory.createLineChart(name, "cat x", "val y",
 				dataset, PlotOrientation.VERTICAL, true, true, true);
 		
 		ChartPanel loadChartPanel = new ChartPanel(loadImageChart);
@@ -298,31 +272,5 @@ public class MainView implements ActionListener, ChangeListener{
 		loadChartPanelLeft = loadChartPanel;
 		frame.getContentPane().add(loadChartPanelLeft);
 		
-	}
-	
-	public String getPath(String path){
-		String endPath = "";
-		StringTokenizer token = new StringTokenizer(path, "\\");
-		String[] tab = new String[token.countTokens()];
-		int p = 0;
-		while (token.hasMoreTokens()) {
-			tab[p] = token.nextToken();
-			p++;
-		}
-
-		for(int i = 0; i < tab.length; i++){
-			if(!tab[i].equals("sounds")){
-				tab[i] = "";
-			}else{
-				break;
-			}
-		}
-		for (String string : tab) {
-			if(!string.equals("")){
-				endPath += string + "\\";
-			}
-		}
-		
-		return endPath.substring(0, endPath.length()-1);
 	}
 }

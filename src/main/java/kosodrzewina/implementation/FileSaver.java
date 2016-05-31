@@ -1,18 +1,9 @@
 package kosodrzewina.implementation;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-
 import WavFile.WavFile;
-
-import javax.sound.sampled.AudioFileFormat.Type;
-
+import WavFile.WavFileException;
 import kosodrzewina.model.Sound;
 
 public class FileSaver {
@@ -35,7 +26,33 @@ public class FileSaver {
 //			e.printStackTrace();
 //		}
 //	}
-	
+	public static void saveWav(Sound sound) {
+		File file = new File(destination+name);
+		try {
+			// Create new .wav
+			WavFile wf = WavFile.newWavFile(file, 
+					sound.getNumChannels(), 
+					sound.getNumFrames(), 
+					sound.getValidBits(), 
+					sound.getSampleRate()
+					);
+			
+			// Write Frames
+			wf.writeFrames(sound.getFrames(), 
+					sound.getFrames()[0].length
+					);
+			
+			// Close WavFile
+			wf.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (WavFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 		
 }
