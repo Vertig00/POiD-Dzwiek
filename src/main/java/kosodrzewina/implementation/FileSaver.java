@@ -41,7 +41,6 @@ public class FileSaver {
 			wf.writeFrames(sound.getFrames(), 
 					sound.getFrames()[0].length
 					);
-			
 			// Close WavFile
 			wf.close();
 			

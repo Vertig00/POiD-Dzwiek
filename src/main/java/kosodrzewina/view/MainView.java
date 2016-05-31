@@ -168,6 +168,7 @@ public class MainView implements ActionListener{
 		frame.getContentPane().add(frequencyLabel);
 		
 		dokl = new JTextField();
+		dokl.setText("0");
 		dokl.setBounds(220, 72, 86, 20);
 		frame.getContentPane().add(dokl);
 		dokl.setColumns(10);
