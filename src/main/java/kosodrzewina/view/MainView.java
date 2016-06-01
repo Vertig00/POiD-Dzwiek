@@ -57,7 +57,7 @@ public class MainView implements ActionListener{
 	JLabel fileName;
 	JLabel filePath;
 	InputStream in;
-	Sound sound;;
+	Sound sound;
 	ChartPanel loadChartPanelLeft;
 	JFreeChart loadImageChart;
 	JComboBox<String> options;

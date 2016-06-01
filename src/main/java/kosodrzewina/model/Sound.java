@@ -45,6 +45,15 @@ public class Sound {
 		System.out.println("");
 	}
 	
+	public Sound(Sound sound) {
+		this.frames = new double[sound.getFrames().length][];
+		for(int i = 0; i < sound.getFrames().length; i++)
+			this.frames[i] = sound.getFrames()[i].clone();
+		this.numChannels = sound.numChannels;
+		this.validBits = sound.getValidBits();
+		this.sampleRate = sound.getSampleRate();
+	}
+	
 }
 
 
