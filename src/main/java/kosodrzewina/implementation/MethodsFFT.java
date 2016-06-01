@@ -14,17 +14,21 @@ public class MethodsFFT {
 	
 	public static double[] fftFramesStatic; 
 	
+	/*
+	 * UWAGA: Bierze srodek dzwieku.
+	 */
 	public static Sound fourierSpectrum(Sound originalSound) {
 		System.out.println("   fourierSpercturm:start");
 		Sound modifiedSound = new Sound(originalSound);
 		int numFrames = modifiedSound.getNumFrames();
 		
-		DoubleFFT_1D fft = new DoubleFFT_1D(numFrames);
-		double fftFrames[] = new double[numFrames*2];
+		
+		double fftFrames[] = new double[numFrames];
+		DoubleFFT_1D fft = new DoubleFFT_1D(fftFrames.length/2);
 		
 		// load from originalSound
-		for(int i = 0; i < numFrames; i++)
-			fftFrames[i*2] = originalSound.getFrames()[0][i];
+		for(int i = 0; i < fftFrames.length/2; i++)
+			fftFrames[i*2] = originalSound.getFrames()[0][i+(numFrames/2)];
 		// FFT
 		System.out.println("   fourierSpercturm:fft:start");
 		fft.complexForward(fftFrames);
@@ -47,8 +51,8 @@ public class MethodsFFT {
 		fft.complexInverse(fftFrames, true);
 		System.out.println("   fourierSpercturm:inversefft:end");
 		// save to modifiedSound
-		for(int i = 0; i < numFrames; i++)
-			modifiedSound.getFrames()[0][i] = fftFrames[i*2];
+		for(int i = 0; i < fftFrames.length/2; i++)
+			modifiedSound.getFrames()[0][i+(numFrames/2)] = fftFrames[i*2];
 		
 		System.out.println("   fourierSpercturm:end");
 		return modifiedSound;
@@ -131,16 +135,28 @@ public class MethodsFFT {
 		
 		return magnitude;
 	}
+	private static double[] getPartMagnitude() {
+		int halfLng = 2000;
+		double magnitude[] = new double[halfLng];
+		
+		for(int i = 0; i < halfLng; i++)
+			magnitude[i] = Math.sqrt(
+					Math.pow(fftFramesStatic[2*i], 2) + 
+					Math.pow(fftFramesStatic[2*i+1], 2)
+					);
+		
+		return magnitude;
+	}
 	
 	public static ChartPanel chart() {
 		double[] dataset = getMagnitude();
-		XYSeries series = new XYSeries("PROtest");
+		XYSeries series = new XYSeries("Magnitude");
 		for(int i = 0; i <dataset.length; i++)
 			series.add(i, dataset[i]);
 		XYSeriesCollection data = new XYSeriesCollection(series);
 		
 		JFreeChart chart = ChartFactory.createXYLineChart(
-				"testPro",          // chart title
+				"Spectrums",          // chart title
 				"X",
 				"Y",
 				data,                // data

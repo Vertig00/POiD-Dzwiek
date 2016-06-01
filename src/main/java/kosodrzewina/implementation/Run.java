@@ -11,7 +11,7 @@ public class Run {
 
 	public static void main(String[] args) {
 		System.out.println("run:start");
-		String path2 = "sounds/artificial/diff/120Hz.wav";
+		String path2 = "sounds/artificial/diff/80Hz.wav";
 		File file = new File(path2);
 
 		// Read
