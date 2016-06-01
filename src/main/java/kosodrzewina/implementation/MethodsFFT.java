@@ -44,7 +44,11 @@ public class MethodsFFT {
 		// Zapis stanu fftFrames
 		fftFramesStatic = fftFrames.clone();
 		
-		// TODO
+		// Znalezienie pierwszego max
+		int max = findMax(fftFrames);
+		System.out.println("czestotliwosc w Hz = " + max);
+		
+		
 		
 		// inverse FFT
 		System.out.println("   fourierSpercturm:inversefft:start");
@@ -56,6 +60,23 @@ public class MethodsFFT {
 		
 		System.out.println("   fourierSpercturm:end");
 		return modifiedSound;
+	}
+	
+	/*
+	 * szuka tylko w pierwszej cwiartce
+	 */
+	private static int findMax(double fftFrames[]) {
+		int index = 0;
+		int range = fftFrames.length/4;
+		
+		double val = -1;
+		for(int i = 0; i < range; i++)
+			if( val < Math.abs(fftFrames[i]) ) {
+				val = Math.abs(fftFrames[i]);
+				index = i;
+			}
+		
+		return index;
 	}
 	
 	private static void oknoGaussaCalosc(double fftFrames[], double alpha) {
@@ -136,7 +157,7 @@ public class MethodsFFT {
 		return magnitude;
 	}
 	private static double[] getPartMagnitude() {
-		int halfLng = 2000;
+		int halfLng = 1000;
 		double magnitude[] = new double[halfLng];
 		
 		for(int i = 0; i < halfLng; i++)
@@ -152,7 +173,7 @@ public class MethodsFFT {
 		double[] dataset = getPartMagnitude();
 		XYSeries series = new XYSeries("Magnitude");
 		for(int i = 0; i <dataset.length; i++)
-			series.add(i, dataset[i]);
+			series.add(i*2, dataset[i]);
 		XYSeriesCollection data = new XYSeriesCollection(series);
 		
 		JFreeChart chart = ChartFactory.createXYLineChart(
