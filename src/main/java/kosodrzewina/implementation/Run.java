@@ -10,20 +10,31 @@ import kosodrzewina.model.Sound;
 public class Run {
 
 	public static void main(String[] args) {
-		String path1 = "src/main/resources/TestWav/i.wav";
-		String path2 = "sounds/seq/DWK_violin.wav";
+		System.out.println("run:start");
+		String path2 = "sounds/artificial/diff/120Hz.wav";
 		File file = new File(path2);
 
 		// Read
+		System.out.println();
 		Sound sound = readWav(file);
-		sound.info();
+//		sound.info();
+		
+		// FFT
+		Sound modifiedSound = MethodsFFT.fourierSpectrum(sound);
+		System.out.println("");
+		
+		// modifiedSound info
+//		modifiedSound.info();
 		
 		// Save
-		String pathOut2 = "sounds/seq/Violinno.wav";
+		String pathOut2 = "sounds/artificial/diff/afterFFT.wav";
 		File fileOut = new File(pathOut2);
-		saveWav(sound, fileOut);
+		saveWav(modifiedSound, fileOut);
 		
+		System.out.println("run:end");
 	}
+	
+	
 	
 	private static void outDoubles(double tab[]) {
 		System.out.println("Tab");
@@ -40,8 +51,8 @@ public class Run {
 			
 			// Open .wav
 			WavFile wf = WavFile.openWavFile(file);
-			wf.display();
-			System.out.println("");
+//			wf.display();
+//			System.out.println("");
 			
 			// Save parameters
 			sound.setNumChannels( wf.getNumChannels() );

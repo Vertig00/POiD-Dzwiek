@@ -45,6 +45,9 @@ public class Sound {
 		System.out.println("");
 	}
 	
+	public Sound() {
+		
+	}
 	public Sound(Sound sound) {
 		this.frames = new double[sound.getFrames().length][];
 		for(int i = 0; i < sound.getFrames().length; i++)
