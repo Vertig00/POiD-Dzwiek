@@ -4,21 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
-import edu.emory.mathcs.jtransforms.fft.FloatFFT_1D;
 import kosodrzewina.model.Sound;
 
 public class Methods {
 	
 	private static double numberProbe = 2048;
 	private static int frameStart = 8000;
-	private static int frameNextStart = 1000;
+	private static int frameNextStart = 8000;
 	
 	public double[][] newSound;
 	
@@ -30,7 +22,7 @@ public class Methods {
 	 */
 	public static double zeroCrossingLine(Sound s){
 		List<Long> frequencyList = new ArrayList<Long>();
-		List<Double> frequencySec = new ArrayList<Double>();
+		List<Long> frequencySec = new ArrayList<Long>();
 		Sound s2 = new Sound(s);
 		double[][] newSound = s2.getFrames();
 		int allSamplesCount = s.getFrames()[0].length;
@@ -41,7 +33,7 @@ public class Methods {
 		else 												c = allSamplesCount / (int)s.getSampleRate()+1;
 		
 		
-		for(int p = 0 ; p < c + 1; p++) {
+		for(int p = 0 ; p < c; p++) {
 			if(allSamplesCountTemp - (int)s.getSampleRate() >= 0){
 				samplePerSecond = s.getSampleRate();
 				allSamplesCountTemp -= s.getSampleRate();
@@ -75,12 +67,15 @@ public class Methods {
 				tempList.add(Math.round(periodsCountInSec));
 				j++;
 			}
-			frequencySec.add(returnAverageFrequency(tempList));
+			frequencySec.add((long)returnAverageFrequency(tempList));
 		}
 		s2.setFrames(newSound);
 		FileSaver.saveWav(s2);
 		System.out.println(frequencySec.toString());
-		return returnAverageFrequency(frequencyList);
+		if(frequencySec.size()>1 &&
+		   frequencySec.get(frequencySec.size()-2) - frequencySec.get(frequencySec.size()-1) >400) 
+			frequencySec.remove(frequencySec.size()-1);
+		return returnAverageFrequency(frequencySec);
 	}
 	
 	
@@ -93,7 +88,7 @@ public class Methods {
 	 */
 	public static double zeroCrossingLineUpdated(Sound s, double probe){
 		List<Long> frequencyList = new ArrayList<Long>();
-		List<Double> frequencySec = new ArrayList<Double>();
+		List<Long> frequencySec = new ArrayList<Long>();
 		Sound s2 = new Sound(s);
 		double[][] newSound = s2.getFrames();
 		int allSamplesCount = s.getFrames()[0].length;
@@ -142,14 +137,14 @@ public class Methods {
 				tempList.add(Math.round(periodsCountInSec));
 				j++;
 			}
-			frequencySec.add(returnAverageFrequency(tempList));
+			frequencySec.add((long) returnAverageFrequency(tempList));
 		}
 		
-		double[][] soundtab = new double[1][44100*frequencySec.size()]; 
-		for(int k = 0; k < frequencySec.size(); k++){
-			Double[] tab = generateSinusoidalSignal(1, frequencySec.get(k), 44100, 44100);
-			for(int l = 0 ;l <44100;l++){
-				soundtab[0][l+k*44100] = tab[l];
+		double[][] soundtab = new double[1][2048*frequencyList.size()]; 
+		for(int k = 0; k < frequencyList.size(); k++){
+			Double[] tab = generateSinusoidalSignal(1, frequencyList.get(k), 2048, 44100);
+			for(int l = 0 ;l <2048;l++){
+				soundtab[0][l+k*2048] = tab[l];
 			}
 		}
 		
@@ -157,7 +152,11 @@ public class Methods {
 		s2.setFrames(soundtab);
 		FileSaver.saveWav(s2);
 		System.out.println(frequencySec.toString());
-		return returnAverageFrequency(frequencyList);
+		
+		if(frequencySec.size()>1 &&
+		   frequencySec.get(frequencySec.size()-2) - frequencySec.get(frequencySec.size()-1) >400) 
+				frequencySec.remove(frequencySec.size()-1);
+	return returnAverageFrequency(frequencySec);
 	}
 	
 	private static double[] filter(double[] tab){
