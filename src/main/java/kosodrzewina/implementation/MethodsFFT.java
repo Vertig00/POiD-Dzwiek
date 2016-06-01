@@ -12,13 +12,13 @@ import kosodrzewina.model.Sound;
 
 public class MethodsFFT {
 	
-	public static double[] fftFramesStatic; 
+	public static double[] fftFramesStatic;
+	public static int hzResult;
 	
 	/*
 	 * UWAGA: Bierze srodek dzwieku.
 	 */
 	public static Sound fourierSpectrum(Sound originalSound) {
-		System.out.println("   fourierSpercturm:start");
 		Sound modifiedSound = new Sound(originalSound);
 		int numFrames = modifiedSound.getNumFrames();
 		
@@ -30,9 +30,7 @@ public class MethodsFFT {
 		for(int i = 0; i < fftFrames.length/2; i++)
 			fftFrames[i*2] = originalSound.getFrames()[0][i+(numFrames/2)];
 		// FFT
-		System.out.println("   fourierSpercturm:fft:start");
 		fft.complexForward(fftFrames);
-		System.out.println("   fourierSpercturm:fft:end");
 		
 		// Pre emfazy
 //		preemphase(fftFrames, 0.9);
@@ -48,17 +46,28 @@ public class MethodsFFT {
 		int max = findMax(fftFrames);
 		System.out.println("czestotliwosc w Hz = " + max);
 		
+		// Zapis stanu max
+		hzResult = max;
 		
+		// utworzenie tablicy z tonem hz
+		double toneHz[][] = new double[1][originalSound.getFrames()[0].length];
+		for(int i = 0; i < toneHz[0].length; i++) {
+			toneHz[0][i] = Math.sin( 
+					2.0*Math.PI * hzResult * 
+					((double)i/modifiedSound.getSampleRate()) 
+					);
+		}
+		// zapis tonu do modifiedSound
+		modifiedSound.setFrames(toneHz);
 		
+		/*
 		// inverse FFT
-		System.out.println("   fourierSpercturm:inversefft:start");
 		fft.complexInverse(fftFrames, true);
-		System.out.println("   fourierSpercturm:inversefft:end");
 		// save to modifiedSound
 		for(int i = 0; i < fftFrames.length/2; i++)
 			modifiedSound.getFrames()[0][i+(numFrames/2)] = fftFrames[i*2];
+		*/
 		
-		System.out.println("   fourierSpercturm:end");
 		return modifiedSound;
 	}
 	
@@ -170,7 +179,7 @@ public class MethodsFFT {
 	}
 	
 	public static ChartPanel chart() {
-		double[] dataset = getPartMagnitude();
+		double[] dataset = getMagnitude();
 		XYSeries series = new XYSeries("Magnitude");
 		for(int i = 0; i <dataset.length; i++)
 			series.add(i*2, dataset[i]);

@@ -11,7 +11,7 @@ public class Run {
 
 	public static void main(String[] args) {
 		System.out.println("run:start");
-		String path2 = "sounds/artificial/diff/80Hz.wav";
+		String path2 = "sounds/artificial/diff/1366Hz.wav";
 		File file = new File(path2);
 
 		// Read
@@ -27,7 +27,7 @@ public class Run {
 //		modifiedSound.info();
 		
 		// Save
-		String pathOut2 = "sounds/artificial/diff/afterFFT.wav";
+		String pathOut2 = "sounds/artificial/diff/tone.wav";
 		File fileOut = new File(pathOut2);
 		saveWav(modifiedSound, fileOut);
 		
