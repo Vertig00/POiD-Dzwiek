@@ -34,6 +34,16 @@ public class Run {
 		System.out.println("run:end");
 	}
 	
+	public static void mainRun(Sound sound) {
+		Sound modifiedSound = MethodsFFT.fourierSpectrum(sound);
+		System.out.println("");
+		
+		// Save
+		String pathOut2 = "sounds/generatedTone.wav";
+		File fileOut = new File(pathOut2);
+		saveWav(modifiedSound, fileOut);
+	}
+	
 	
 	
 	private static void outDoubles(double tab[]) {
