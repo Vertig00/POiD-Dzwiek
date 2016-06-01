@@ -18,6 +18,10 @@ public class Methods {
 	
 	private static double numberProbe = 2048;
 	private static int frameStart = 8000;
+	private static int frameNextStart = 1000;
+	
+	public double[][] newSound;
+	
 	/**
 	 * Oblicza metode przejœ przez zero na surowo
 	 * czyli totalne przejœcia przez 0
@@ -26,26 +30,60 @@ public class Methods {
 	 */
 	public static double zeroCrossingLine(Sound s){
 		List<Long> frequencyList = new ArrayList<Long>();
-		int j = 1;
-		while((frameStart+(j*numberProbe)) < s.getSampleRate()-numberProbe){
-			double count = frameStart+(j*numberProbe);
-			double buffer[] = extractSoundTab(s.getFrames(),j);
-			double numberOfZeroCrossings = 0;
-			for(int i = 1 ; i < buffer.length ; i++){
-				if(buffer[i] * buffer[i-1] < 0){
-					numberOfZeroCrossings++;
-				}
+		List<Double> frequencySec = new ArrayList<Double>();
+		Sound s2 = new Sound(s);
+		double[][] newSound = s2.getFrames();
+		int allSamplesCount = s.getFrames()[0].length;
+		int allSamplesCountTemp = s.getFrames()[0].length;
+		double samplePerSecond = s.getSampleRate();
+		int c = 0;
+		if(allSamplesCount % (int)s.getSampleRate() == 0)	c = allSamplesCount / (int)s.getSampleRate();
+		else 												c = allSamplesCount / (int)s.getSampleRate()+1;
+		
+		
+		for(int p = 0 ; p < c + 1; p++) {
+			if(allSamplesCountTemp - (int)s.getSampleRate() >= 0){
+				samplePerSecond = s.getSampleRate();
+				allSamplesCountTemp -= s.getSampleRate();
+			}else{
+				samplePerSecond = allSamplesCountTemp;
 			}
-	//		zeroCrossingRate = numberOfZeroCrossings / (double) (buffer.length - 1);
-	//		return zeroCrossingRate;
-			double numberOfPeriod = numberOfZeroCrossings/2;
-			double framesPerPeriod = numberProbe/numberOfPeriod;
-			double periodsCountInSec = 44100/framesPerPeriod;
-			frequencyList.add(Math.round(periodsCountInSec));
-			j++;
+			double krok = 0;
+			if(p == 0){
+				krok = frameStart;
+			}else{
+				krok = frameNextStart;
+			}
+			
+			int j = 0;
+			List<Long> tempList = new ArrayList<Long>();
+			while((krok+(j*numberProbe)) < samplePerSecond- 2048){
+				double count = krok+(j*numberProbe);
+				double buffer[] = extractSoundTab(s.getFrames(),j,p,s.getSampleRate(),krok);
+				double numberOfZeroCrossings = 0;
+				for(int i = 1 ; i < buffer.length ; i++){
+					if(buffer[i] * buffer[i-1] < 0){
+						numberOfZeroCrossings++;
+					}
+				}
+		//		zeroCrossingRate = numberOfZeroCrossings / (double) (buffer.length - 1);
+		//		return zeroCrossingRate;
+				double numberOfPeriod = numberOfZeroCrossings/2;
+				double framesPerPeriod = numberProbe/numberOfPeriod;
+				double periodsCountInSec = samplePerSecond/framesPerPeriod;
+				frequencyList.add(Math.round(periodsCountInSec));
+				tempList.add(Math.round(periodsCountInSec));
+				j++;
+			}
+			frequencySec.add(returnAverageFrequency(tempList));
 		}
+		s2.setFrames(newSound);
+		FileSaver.saveWav(s2);
+		System.out.println(frequencySec.toString());
 		return returnAverageFrequency(frequencyList);
 	}
+	
+	
 	
 	/**
 	 * Oblicza metode zero-crossing po upgrade
@@ -55,31 +93,70 @@ public class Methods {
 	 */
 	public static double zeroCrossingLineUpdated(Sound s, double probe){
 		List<Long> frequencyList = new ArrayList<Long>();
-//		double probe = 0.05;
-		int j = 1;
-		while((frameStart+(j*numberProbe)) < s.getSampleRate()-numberProbe){
-			double count = frameStart+(j*numberProbe);
-			double buffer[] = extractSoundTab(s.getFrames(),j);
-			double numberOfZeroCrossings = 0;
-			buffer = filter(buffer);
-			
-			for(int i = 0 ; i < buffer.length-1 ; i++){
-				if( (buffer[i] > buffer[i+1] && buffer[i] > probe && buffer[i+1] < probe)||
-					(buffer[i] < buffer[i+1] && buffer[i] < -probe && buffer[i+1] > -probe)){
-					numberOfZeroCrossings++;
-				}
+		List<Double> frequencySec = new ArrayList<Double>();
+		Sound s2 = new Sound(s);
+		double[][] newSound = s2.getFrames();
+		int allSamplesCount = s.getFrames()[0].length;
+		int allSamplesCountTemp = s.getFrames()[0].length;
+		double samplePerSecond = s.getSampleRate();
+		int c = 0;
+		if(allSamplesCount % (int)s.getSampleRate() == 0)	c = allSamplesCount / (int)s.getSampleRate();
+		else 												c = allSamplesCount / (int)s.getSampleRate()+1;
+		
+		for(int p = 0 ; p < c; p++) {
+			if(allSamplesCountTemp - (int)s.getSampleRate() >= 0){
+				samplePerSecond = s.getSampleRate();
+				allSamplesCountTemp -= s.getSampleRate();
+			}else{
+				samplePerSecond = allSamplesCountTemp;
 			}
+			
+			double krok = 0;
+			if(p == 0)	krok = frameStart;
+			else		krok = frameNextStart;
+			
+			int j = 0;
+			List<Long> tempList = new ArrayList<Long>();
+			while((krok+(j*numberProbe)) < samplePerSecond- 2048){
+				double count = krok+(j*numberProbe);
+				double buffer[] = extractSoundTab(s.getFrames(),j,p,s.getSampleRate(),krok);
+				double numberOfZeroCrossings = 0;
+				buffer = filter(buffer);
+				for(int i = 0 ; i < buffer.length-1 ; i++){
+					
+					newSound[0][(int) (krok+(j*numberProbe)+i)] = buffer[i];
+					if( (buffer[i] > buffer[i+1] && buffer[i] > probe && buffer[i+1] < probe)||
+						(buffer[i] < buffer[i+1] && buffer[i] < -probe && buffer[i+1] > -probe)){
+						numberOfZeroCrossings++;
+					}
+				}
 //			for(int i = 1 ; i < buffer.length ; i++){
 //				if(buffer[i] * buffer[i-1] < 0){
 //					numberOfZeroCrossings++;
 //				}
 //			}
-			double numberOfPeriod = numberOfZeroCrossings/2;
-			double framesPerPeriod = numberProbe/numberOfPeriod;
-			double periodsCountInSec = 44100/framesPerPeriod;
-			frequencyList.add(Math.round(periodsCountInSec));
-			j++;
+				double numberOfPeriod = numberOfZeroCrossings/2;
+				double framesPerPeriod = numberProbe/numberOfPeriod;
+				double periodsCountInSec = samplePerSecond/framesPerPeriod;
+				frequencyList.add(Math.round(periodsCountInSec));
+				tempList.add(Math.round(periodsCountInSec));
+				j++;
+			}
+			frequencySec.add(returnAverageFrequency(tempList));
 		}
+		
+		double[][] soundtab = new double[1][44100*frequencySec.size()]; 
+		for(int k = 0; k < frequencySec.size(); k++){
+			Double[] tab = generateSinusoidalSignal(1, frequencySec.get(k), 44100, 44100);
+			for(int l = 0 ;l <44100;l++){
+				soundtab[0][l+k*44100] = tab[l];
+			}
+		}
+		
+		
+		s2.setFrames(soundtab);
+		FileSaver.saveWav(s2);
+		System.out.println(frequencySec.toString());
 		return returnAverageFrequency(frequencyList);
 	}
 	
@@ -105,10 +182,10 @@ public class Methods {
 		return (Double) null;
 	}
 	
-	private static double[] extractSoundTab(double[][] tab, int count){
+	private static double[] extractSoundTab(double[][] tab, int count, int per, long l, double krok){
 		double[][] temp = tab;
 		double[] buffer = new double[(int) numberProbe] ;
-		int starter = (int) (frameStart+(count*numberProbe));
+		int starter = (int) (krok+(count*numberProbe)+(l*per));
 //		if(starter < frames){
 			for(int i = 0; i < numberProbe; i++){
 				buffer[i] = temp[0][starter+i];
@@ -172,6 +249,22 @@ public class Methods {
 		//TODO: poprawic i
 		return Math.cos((2*Math.PI*n*k)/N)-i*Math.sin((2*Math.PI*n*k)/N);
 	}
+	
+	
+    public static Double[] generateSinusoidalSignal(double amplitude, double frequency, double time, double samplingFrequency){
+        Double[] samples = new Double[(int) (time)];
+        double T = 1.0/frequency;
+        for(double i = 0; i < samples.length; i++){
+            double t = i / samplingFrequency;
+            samples[(int) i] = computeSinusoidalSignalValue(amplitude, t, T);
+        }
+
+        return samples;
+    }
+
+    private static double computeSinusoidalSignalValue(double amplitude, double t, double T){
+        return amplitude * Math.sin(((2*Math.PI)*(t))/T);
+    }
 	
 }
 
