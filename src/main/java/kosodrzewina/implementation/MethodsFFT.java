@@ -30,9 +30,17 @@ public class MethodsFFT {
 		fft.complexForward(fftFrames);
 		System.out.println("   fourierSpercturm:fft:end");
 		
-		// TODO
-		//preemphase(fftFrames, 0.9);
+		// Pre emfazy
+//		preemphase(fftFrames, 0.9);
+//		oknoGaussaCalosc(fftFrames, 0.95);
+//		oknoHammingaCalosc(fftFrames);
+//		oknoHanningaCalosc(fftFrames);
+//		oknoBartlettaCalosc(fftFrames);
+		
+		// Zapis stanu fftFrames
 		fftFramesStatic = fftFrames.clone();
+		
+		// TODO
 		
 		// inverse FFT
 		System.out.println("   fourierSpercturm:inversefft:start");
@@ -44,6 +52,63 @@ public class MethodsFFT {
 		
 		System.out.println("   fourierSpercturm:end");
 		return modifiedSound;
+	}
+	
+	private static void oknoGaussaCalosc(double fftFrames[], double alpha) {
+		int count = fftFrames.length/2;
+		
+		for(int i = 0; i < count; i++)
+			fftFrames[2*i] = fftFrames[2*i] * oknoGaussa(i, count, alpha);
+	}
+	
+	private static double oknoGaussa(double n, double N, double alfa){
+		double licznik = n-(N-1)/2;
+		double mianownik = alfa*(N-1)/2;
+		double b = Math.pow(-0.5*(licznik/mianownik),2);
+		double value = Math.pow(Math.E, b);
+		
+		return value;
+	}
+	
+	private static void oknoHammingaCalosc(double fftFrames[]) {
+		int count = fftFrames.length/2;
+		
+		for(int i = 0; i < count; i++)
+			fftFrames[2*i] = fftFrames[2*i] * oknoHamminga(i, count);
+	}
+	
+	private static double oknoHamminga(double n, double N){
+		double licznik = 2*Math.PI*n;
+		double mianownik = N-1;
+		double value = 0.53836 - 0.46164 * Math.cos(licznik/mianownik);
+		return value;
+	}
+	
+	private static void oknoHanningaCalosc(double fftFrames[]) {
+		int count = fftFrames.length/2;
+		
+		for(int i = 0; i < count; i++)
+			fftFrames[2*i] = fftFrames[2*i] * oknoHanninga(i, count);
+	}
+	
+	private static double oknoHanninga(double n, double N){
+		double licznik = 2*Math.PI*n;
+		double mianownik = N-1;
+		double value = 0.5*(1-Math.cos(licznik/mianownik));
+		return value;
+	}
+	
+	private static void oknoBartlettaCalosc(double fftFrames[]) {
+		int count = fftFrames.length/2;
+		
+		for(int i = 0; i < count; i++)
+			fftFrames[2*i] = fftFrames[2*i] * oknoBartletta(i, count);
+	}
+	
+	private static double oknoBartletta(double n, double N){
+		double part = N-1;
+		double value = (2/part)*((part/2)-Math.abs(n-(part/2)));
+		return value;
 	}
 	
 	private static void preemphase(double fftFrames[], double alpha) {
