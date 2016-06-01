@@ -149,7 +149,7 @@ public class MethodsFFT {
 	}
 	
 	public static ChartPanel chart() {
-		double[] dataset = getMagnitude();
+		double[] dataset = getPartMagnitude();
 		XYSeries series = new XYSeries("Magnitude");
 		for(int i = 0; i <dataset.length; i++)
 			series.add(i, dataset[i]);
