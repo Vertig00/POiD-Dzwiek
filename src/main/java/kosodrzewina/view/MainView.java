@@ -21,6 +21,8 @@ import javax.swing.JSeparator;
 import kosodrzewina.implementation.FileLoader;
 import kosodrzewina.implementation.FileSaver;
 import kosodrzewina.implementation.Methods;
+import kosodrzewina.implementation.MethodsFFT;
+import kosodrzewina.implementation.Run;
 import kosodrzewina.model.Sound;
 import sun.audio.AudioStream;
 
@@ -224,7 +226,10 @@ public class MainView implements ActionListener{
 				Double frequency = Methods.zeroCrossingLineUpdated(sound, Double.parseDouble(dokl.getText()));
 				frequencyLabel.setText(frequency.toString()+"Hz");
 			}else{
-				
+				Run.main(sound);
+				double frequency = MethodsFFT.hzResult;
+//				Double frequency = Methods.zeroCrossingLineUpdated(sound, Double.parseDouble(dokl.getText()));
+				frequencyLabel.setText(frequency+"Hz");
 			}
 		}
 	}

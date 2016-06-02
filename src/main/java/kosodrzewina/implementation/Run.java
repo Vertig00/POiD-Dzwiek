@@ -9,15 +9,20 @@ import kosodrzewina.model.Sound;
 
 public class Run {
 
-	public static void main(String[] args) {
-		System.out.println("run:start");
-		String path2 = "sounds/artificial/diff/1366Hz.wav";
-		File file = new File(path2);
-
-		// Read
-		System.out.println();
-		Sound sound = readWav(file);
+	public static void main(Sound args) {
+		
+//		System.out.println("run:start");
+//		String path2 = "sounds/artificial/diff/1366Hz.wav";
+//		File file = new File(path2);
+//
+//		// Read
+//		System.out.println();
+//		Sound sound = readWav(file);
 //		sound.info();
+		
+		
+		//do GUI, jak chcesz wrócic do swojego odkomenduj powy¿sze i zmieñ main na String[]
+		Sound sound = args;
 		
 		// FFT
 		Sound modifiedSound = MethodsFFT.fourierSpectrum(sound);
