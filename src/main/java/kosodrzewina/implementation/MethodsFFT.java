@@ -44,7 +44,14 @@ public class MethodsFFT {
 		
 		// Znalezienie pierwszego max
 		int max = findMax(fftFrames);
+		// obliczenie max w Hz
+		double factor =(double) fftFrames.length / originalSound.getSampleRate();
+//		System.out.println("factor: " + factor);
+//		System.out.println( max/factor );
+		max = (int) (max/factor);
+		// Max w Hz
 		System.out.println("czestotliwosc w Hz = " + max);
+		
 		
 		// Zapis stanu max
 		hzResult = max;

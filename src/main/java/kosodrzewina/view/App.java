@@ -19,7 +19,8 @@ public class App {
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setVisible(true);
 
-                String path = "sounds/artificial/diff/1366Hz.wav";
+                String path = "sounds/natural/flute/443Hz.wav";
+                String path2 = "sounds/artificial/diff/180Hz.wav";
                 String[] args = {path};
                 Run.main(args);
                 ChartPanel cp = MethodsFFT.chart();
