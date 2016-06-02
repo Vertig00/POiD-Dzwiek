@@ -33,8 +33,8 @@ public class MethodsFFT {
 		fft.complexForward(fftFrames);
 		
 		// Pre emfazy
-//		preemphase(fftFrames, 0.9);
-//		oknoGaussaCalosc(fftFrames, 0.95);
+//		preemphase(fftFrames, 0.99);
+//		oknoGaussaCalosc(fftFrames, 0.99);
 //		oknoHammingaCalosc(fftFrames);
 //		oknoHanningaCalosc(fftFrames);
 //		oknoBartlettaCalosc(fftFrames);
@@ -173,7 +173,7 @@ public class MethodsFFT {
 		return magnitude;
 	}
 	private static double[] getPartMagnitude() {
-		int halfLng = 1000;
+		int halfLng = 6000;
 		double magnitude[] = new double[halfLng];
 		
 		for(int i = 0; i < halfLng; i++)
@@ -186,7 +186,7 @@ public class MethodsFFT {
 	}
 	
 	public static ChartPanel chart() {
-		double[] dataset = getMagnitude();
+		double[] dataset = getPartMagnitude();
 		XYSeries series = new XYSeries("Magnitude");
 		for(int i = 0; i <dataset.length; i++)
 			series.add(i*2, dataset[i]);

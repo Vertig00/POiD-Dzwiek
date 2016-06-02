@@ -9,7 +9,7 @@ import kosodrzewina.model.Sound;
 
 public class Run {
 
-	public static void main(Sound args) {
+	public static void mainRun(Sound args) {
 //		System.out.println("run:start");
 ////		String path2 = "sounds/artificial/diff/1366Hz.wav";
 //		File file = new File(args[0]);
@@ -38,9 +38,14 @@ public class Run {
 		System.out.println("run:end");
 	}
 	
-	public static void mainRun(Sound sound) {
+	public static void main(String[] args) {
+	    File file = new File(args[0]);
+	    
+          // Read
+          Sound sound = readWav(file);
+          //sound.info();
+	    
 		Sound modifiedSound = MethodsFFT.fourierSpectrum(sound);
-		System.out.println("");
 		
 		// Save
 		String pathOut2 = "sounds/generatedTone.wav";

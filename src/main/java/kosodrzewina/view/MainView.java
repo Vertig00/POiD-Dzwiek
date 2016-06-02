@@ -226,7 +226,7 @@ public class MainView implements ActionListener{
 				Double frequency = Methods.zeroCrossingLineUpdated(sound, Double.parseDouble(dokl.getText()));
 				frequencyLabel.setText(frequency.toString()+"Hz");
 			}else{
-				Run.main(sound);
+				Run.mainRun(sound);
 				double frequency = MethodsFFT.hzResult;
 //				Double frequency = Methods.zeroCrossingLineUpdated(sound, Double.parseDouble(dokl.getText()));
 				frequencyLabel.setText(frequency+"Hz");
