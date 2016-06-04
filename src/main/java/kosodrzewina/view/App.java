@@ -19,13 +19,13 @@ public class App {
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setVisible(true);
 
-                String path = "sounds/natural/viola/698Hz.wav";
-                String[] args = {path};
+                String path = "sounds/artificial/diff/270Hz.wav";
+                String partLenght = "512";
+                String[] args = {path, partLenght};
                 Run.main(args);
-                ChartPanel cp = MethodsFFT.chart();
-                double hzResult = MethodsFFT.hzResult;
+                //ChartPanel cp = MethodsFFT.chart();
                 
-                frame.getContentPane().add(cp);
+                //frame.getContentPane().add(cp);
             }
         });
 

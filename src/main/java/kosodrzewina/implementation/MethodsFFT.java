@@ -1,5 +1,8 @@
 package kosodrzewina.implementation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -14,6 +17,8 @@ public class MethodsFFT {
 	
 	public static double[] fftFramesStatic;
 	public static int hzResult;
+	// -----
+	public static int[] statPartsHz;
 	
 	/*
 	 * UWAGA: Bierze srodek dzwieku.
@@ -76,6 +81,119 @@ public class MethodsFFT {
 		*/
 		
 		return modifiedSound;
+	}
+	
+
+	/**
+	 * @param originalSound
+	 * @param partLength
+	 */
+	public static Sound generateSoundFourier(Sound originalSound, int partLength) {
+		
+		// #1. Clone original sound
+		Sound modifiedSound = new Sound(originalSound);
+		
+		// #2. Divide original sound
+		List<double[]> soundParts = divideSound(originalSound, partLength);
+		
+		// #3. get each part Hz (FFT)
+		int[] partsHz = new int[soundParts.size()];
+		for(int i = 0; i < soundParts.size(); i++ ) {
+			partsHz[i] = findHzFFT( soundParts.get(i), originalSound.getSampleRate() );
+		}
+		statPartsHz = partsHz;
+		
+		// #4. Generate tones for parts
+		List<double[]> soundTones = generateTones(soundParts, partsHz, originalSound.getSampleRate());
+		
+		// #5. Merge tones and save them as modified sound frames
+		double[] frames = mergeTones(soundTones, originalSound.getFrames()[0].length);
+		double[][] fullFrames = new double[1][];
+		fullFrames[0] = frames;
+		modifiedSound.setFrames(fullFrames);
+
+		return modifiedSound;
+	}
+	private static double[] mergeTones(List<double[]> soundTones, int framesLength) {
+		double[] frames = new double[framesLength];
+		
+		double[] tone;
+		int index = 0;
+		for(int i = 0; i < soundTones.size(); i++) {
+			tone = soundTones.get(i);
+			for(int j = 0; j < tone.length; j++) {
+				frames[index] = tone[j];
+				index++;
+			}
+		}
+		
+		return frames;
+	}
+	private static List<double[]> generateTones(List<double[]> soundParts, int[] partsHz, long soundSampleRate) {
+		List<double[]> soundTones = new ArrayList<double[]>();
+		
+		int length;
+		double[] tone;
+		for(int i = 0; i < soundParts.size(); i++) {
+			length = soundParts.get(i).length;
+			
+			tone = new double[length];		
+			for(int j = 0; j < length; j++) {
+				tone[j] = Math.sin( 
+						2.0*Math.PI * partsHz[i] * 
+						((double)j/soundSampleRate) 
+						);
+			}
+			
+			soundTones.add(tone);
+		}
+		
+		return soundTones;
+	}
+	private static int findHzFFT(double[] frames, long soundSampleRate) {
+		int resultHz;
+		
+		// place frames to real part
+		double fftFrames[] = new double[frames.length * 2];	
+		for(int i = 0; i < frames.length; i++)
+			fftFrames[i*2] = frames[i];
+		
+		// FFT
+		DoubleFFT_1D fft = new DoubleFFT_1D(frames.length);
+		fft.complexForward(fftFrames);
+		
+		// Find max
+		int max = findMax(fftFrames);
+		double factor =(double) fftFrames.length / soundSampleRate;
+		max = (int) (max/factor);
+		
+		return max;
+	}
+	private static List<double[]> divideSound(Sound sound, int partLength) {
+		int soundLength = sound.getNumFrames();
+		int partsCount = soundLength/partLength;
+		List<double[]> soundParts = new ArrayList<double[]>();
+
+		// full length parts
+		double[] part;
+		for(int i = 0; i < partsCount; i++) {		
+			part = new double[partLength];
+			for(int j = 0; j < partLength; j++) {
+				part[j] = sound.getFrames()[0][partLength*i + j];
+			}
+			soundParts.add( part );
+		}
+		// last part (not full sized)
+		int lastLength = soundLength%partLength;
+		if(lastLength > 0) {
+			part = new double[ lastLength ];
+			for(int j = 0; j < lastLength; j++) {
+				part[j] = sound.getFrames()[0][partLength*partsCount + j];
+			}
+			soundParts.add( part );
+		}
+		
+		return soundParts;
 	}
 	
 	/*

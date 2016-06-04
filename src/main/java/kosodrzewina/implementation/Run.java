@@ -40,15 +40,20 @@ public class Run {
 	
 	public static void main(String[] args) {
 	    File file = new File(args[0]);
+	    int partLength = Integer.parseInt(args[1]);
 	    
           // Read
           Sound sound = readWav(file);
           //sound.info();
 	    
-		Sound modifiedSound = MethodsFFT.fourierSpectrum(sound);
+//		Sound modifiedSound = MethodsFFT.fourierSpectrum(sound);
+        Sound modifiedSound = MethodsFFT.generateSoundFourier(sound, partLength);
 		
+        for(int i = 0; i < MethodsFFT.statPartsHz.length; i++) 
+        	System.out.println( (i+1) + ": " + MethodsFFT.statPartsHz[i] + " Hz");
+        
 		// Save
-		String pathOut2 = "sounds/generatedTone.wav";
+		String pathOut2 = "sounds/generatedTones.wav";
 		File fileOut = new File(pathOut2);
 		saveWav(modifiedSound, fileOut);
 	}
