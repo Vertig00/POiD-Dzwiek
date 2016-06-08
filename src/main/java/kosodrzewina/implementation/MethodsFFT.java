@@ -1,6 +1,7 @@
 package kosodrzewina.implementation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jfree.chart.ChartFactory;
@@ -15,80 +16,22 @@ import kosodrzewina.model.Sound;
 
 public class MethodsFFT {
 	
-	public static double[] fftFramesStatic;
-	public static int hzResult;
+	// Vars
+	public static double thresholdDivider = 20.0;
+	public static double minThreshold = 8.0;
+	public static double minMaxesDiff = 50.0;
+	
+	public static List<double[]> fftFramesStatic;
 	// -----
 	public static int[] statPartsHz;
-	
-	/*
-	 * UWAGA: Bierze srodek dzwieku.
-	 */
-	public static Sound fourierSpectrum(Sound originalSound) {
-		Sound modifiedSound = new Sound(originalSound);
-		int numFrames = modifiedSound.getNumFrames();
-		
-		
-		double fftFrames[] = new double[numFrames];
-		DoubleFFT_1D fft = new DoubleFFT_1D(fftFrames.length/2);
-		
-		// load from originalSound
-		for(int i = 0; i < fftFrames.length/2; i++)
-			fftFrames[i*2] = originalSound.getFrames()[0][i+(numFrames/2)];
-		// FFT
-		fft.complexForward(fftFrames);
-		
-		// Pre emfazy
-//		preemphase(fftFrames, 0.99);
-//		oknoGaussaCalosc(fftFrames, 0.99);
-//		oknoHammingaCalosc(fftFrames);
-//		oknoHanningaCalosc(fftFrames);
-//		oknoBartlettaCalosc(fftFrames);
-		
-		// Zapis stanu fftFrames
-		fftFramesStatic = fftFrames.clone();
-		
-		// Znalezienie pierwszego max
-		int max = findMax(fftFrames);
-		// obliczenie max w Hz
-		double factor =(double) fftFrames.length / originalSound.getSampleRate();
-//		System.out.println("factor: " + factor);
-//		System.out.println( max/factor );
-		max = (int) (max/factor);
-		// Max w Hz
-		System.out.println("czestotliwosc w Hz = " + max);
-		
-		
-		// Zapis stanu max
-		hzResult = max;
-		
-		// utworzenie tablicy z tonem hz
-		double toneHz[][] = new double[1][originalSound.getFrames()[0].length];
-		for(int i = 0; i < toneHz[0].length; i++) {
-			toneHz[0][i] = Math.sin( 
-					2.0*Math.PI * hzResult * 
-					((double)i/modifiedSound.getSampleRate()) 
-					);
-		}
-		// zapis tonu do modifiedSound
-		modifiedSound.setFrames(toneHz);
-		
-		/*
-		// inverse FFT
-		fft.complexInverse(fftFrames, true);
-		// save to modifiedSound
-		for(int i = 0; i < fftFrames.length/2; i++)
-			modifiedSound.getFrames()[0][i+(numFrames/2)] = fftFrames[i*2];
-		*/
-		
-		return modifiedSound;
-	}
-	
+	public static long staticSampleRate;
 
 	/**
 	 * @param originalSound
 	 * @param partLength
 	 */
 	public static Sound generateSoundFourier(Sound originalSound, int partLength) {
+		fftFramesStatic = new ArrayList<double[]>();
 		
 		// #1. Clone original sound
 		Sound modifiedSound = new Sound(originalSound);
@@ -111,7 +54,7 @@ public class MethodsFFT {
 		double[][] fullFrames = new double[1][];
 		fullFrames[0] = frames;
 		modifiedSound.setFrames(fullFrames);
-
+		
 		return modifiedSound;
 	}
 	private static double[] mergeTones(List<double[]> soundTones, int framesLength) {
@@ -150,8 +93,55 @@ public class MethodsFFT {
 		
 		return soundTones;
 	}
+	private static List<double[]> generateTonesPro(List<double[]> soundParts, int[] partsHz, long soundSampleRate) {
+		List<double[]> soundTones = new ArrayList<double[]>();
+		
+		double div = 1.1;
+		
+		int length;
+		double[] tone;
+		int time = 0;
+		
+		// 0
+		length = soundParts.get(0).length;
+		tone = new double[length];
+		for(int j = 1; j < length; j++) {
+			tone[j] = Math.sin( 
+					2.0*Math.PI * partsHz[0] * 
+					((double)time/soundSampleRate) 
+					);
+			time++;
+		}
+		soundTones.add(tone);	
+		// 
+		for(int i = 1; i < soundParts.size(); i++) {
+			length = soundParts.get(i).length;
+				
+			tone = new double[length];
+			for(int j = 1; j < length/div; j++) {
+				tone[j] = Math.sin( 
+						2.0*Math.PI * 
+						( partsHz[i-1] + ( ((double)j/((double)length/(double)div))*(partsHz[i]-partsHz[i-1]) ) )
+						* ((double)time/soundSampleRate) 
+						);
+				time++;
+			}
+			for(int j = (int)(length/div); j < length; j++) {
+				tone[j] = Math.sin( 
+						2.0*Math.PI * partsHz[i] * 
+						((double)time/soundSampleRate) 
+						);
+				time++;
+			}
+			
+			soundTones.add(tone);
+		}
+		
+		return soundTones;
+	}
 	private static int findHzFFT(double[] frames, long soundSampleRate) {
 		int resultHz;
+		staticSampleRate = soundSampleRate;
 		
 		// place frames to real part
 		double fftFrames[] = new double[frames.length * 2];	
@@ -162,9 +152,12 @@ public class MethodsFFT {
 		DoubleFFT_1D fft = new DoubleFFT_1D(frames.length);
 		fft.complexForward(fftFrames);
 		
+		fftFramesStatic.add(fftFrames);
+		
 		// Find max
-		int max = findMax(fftFrames);
-		double factor =(double) fftFrames.length / soundSampleRate;
+		//int max = findMax(fftFrames);
+		double factor =(double) (fftFrames.length/2) / soundSampleRate;
+		int max = findMedianMax( fftFramesStatic.size()-1, factor );
 		max = (int) (max/factor);
 		
 		return max;
@@ -205,13 +198,71 @@ public class MethodsFFT {
 		
 		double val = -1;
 		for(int i = 0; i < range; i++)
-			if( val < Math.abs(fftFrames[i]) ) {
-				val = Math.abs(fftFrames[i]);
+			if( val < Math.abs(fftFrames[i*2]) ) {
+				val = Math.abs(fftFrames[i*2]);
 				index = i;
 			}
 		
 		return index;
 	}
+	private static int findMedianMax(int ind, double factor) {
+		int index = 0;
+		// get magnitude
+		double[] magnitude = getMagnitude(ind);
+		// find maxes
+		List<Integer> maxes = findMaxes(magnitude);
+		
+		// calc factor
+		double threshold = 0;
+		for(int i = 0; i < maxes.size(); i++)
+			if(threshold < magnitude[maxes.get(i)])
+				threshold = magnitude[maxes.get(i)];
+		threshold = threshold / thresholdDivider;
+		if(threshold < minThreshold) threshold = minThreshold;
+		
+		// take maxes only if( max > factor )
+		List<Integer> sievedMaxes = new ArrayList<Integer>();
+		for(int i = 0; i < maxes.size(); i++)
+			if(magnitude[maxes.get(i)] >= threshold)
+				sievedMaxes.add(maxes.get(i));
+		
+		// calc distances and median
+		if(sievedMaxes.size()<3)
+			return 0;
+		List<Double> dists = new ArrayList<Double>();
+		double[] distances = new double[sievedMaxes.size()-2];	
+		for(int i = 0; i < sievedMaxes.size()-2; i++)
+			if( (sievedMaxes.get(i+1) - sievedMaxes.get(i))/factor > minMaxesDiff ) {
+//				distances[i] = sievedMaxes.get(i+1) - sievedMaxes.get(i);
+				dists.add( (double) (sievedMaxes.get(i+1) - sievedMaxes.get(i)) );
+			}
+		
+		// parse list to array
+		distances = new double[dists.size()];
+		for(int i = 0; i < dists.size(); i++) 
+			distances[i] = dists.get(i);
+		// sort and median
+		Arrays.sort(distances);
+		index = Math.round( (float) distances[ distances.length/2 ]  );
+		
+		return index;
+	}
+	private static List<Integer> findMaxes(double[] magnitude) {
+		List<Integer> maxes = new ArrayList<Integer>();
+		
+		double xL, L, Lx;
+		for(int i = 1; i < magnitude.length-1; i++) {
+			xL = magnitude[i-1];
+			L = magnitude[i];
+			Lx = magnitude[i+1];
+			
+			if( xL < L && L > Lx)
+				maxes.add(i);
+		}
+			
+		return maxes;
+	}
+	
 	
 	private static void oknoGaussaCalosc(double fftFrames[], double alpha) {
 		int count = fftFrames.length/2;
@@ -277,37 +328,45 @@ public class MethodsFFT {
 					- (alpha*fftFrames[2*(i-1)] );
 		
 	}
-	
-	private static double[] getMagnitude() {
-		int halfLng = fftFramesStatic.length/2;
+
+	private static double[] getMagnitude(int index) {
+		int halfLng = fftFramesStatic.get(index).length/4;
+		
 		double magnitude[] = new double[halfLng];
-		
-		for(int i = 0; i < halfLng; i++)
-			magnitude[i] = Math.sqrt(
-					Math.pow(fftFramesStatic[2*i], 2) + 
-					Math.pow(fftFramesStatic[2*i+1], 2)
-					);
-		
+		for (int i = 0; i < halfLng; i++)
+			magnitude[i] = Math.sqrt(Math.pow(fftFramesStatic.get(index)[2 * i], 2) + Math.pow(fftFramesStatic.get(index)[2 * i + 1], 2));
+
 		return magnitude;
 	}
-	private static double[] getPartMagnitude() {
-		int halfLng = 6000;
-		double magnitude[] = new double[halfLng];
+	public static ChartPanel chart(int index) {
+		double[] dataset = getMagnitude(index);
+		XYSeries series = new XYSeries("Magnitude part: "+index+", hz:"+statPartsHz[index]);
 		
-		for(int i = 0; i < halfLng; i++)
-			magnitude[i] = Math.sqrt(
-					Math.pow(fftFramesStatic[2*i], 2) + 
-					Math.pow(fftFramesStatic[2*i+1], 2)
-					);
-		
-		return magnitude;
-	}
-	
-	public static ChartPanel chart() {
-		double[] dataset = getPartMagnitude();
-		XYSeries series = new XYSeries("Magnitude");
+		double factor =(double) (fftFramesStatic.get(index).length/2) / staticSampleRate;
 		for(int i = 0; i <dataset.length; i++)
-			series.add(i*2, dataset[i]);
+			series.add(i/factor, dataset[i]);
+		XYSeriesCollection data = new XYSeriesCollection(series);
+		
+		JFreeChart chart = ChartFactory.createXYLineChart(
+				"Spectrums",          // chart title
+				"X",
+				"Y",
+				data,                // data
+				PlotOrientation.VERTICAL,
+	            true,                // include legend
+	            true,
+	            false);
+		ChartPanel cp = new ChartPanel(chart);
+		
+		return cp;
+	}
+	public static ChartPanel chartShort(int index, int divider) {
+		double[] dataset = getMagnitude(index);
+		XYSeries series = new XYSeries("Magnitude part: "+index+", hz:"+statPartsHz[index]);
+		
+		double factor =(double) (fftFramesStatic.get(index).length/2) / staticSampleRate;
+		for(int i = 0; i <dataset.length/divider; i++)
+			series.add(i/factor, dataset[i]);
 		XYSeriesCollection data = new XYSeriesCollection(series);
 		
 		JFreeChart chart = ChartFactory.createXYLineChart(
@@ -325,3 +384,4 @@ public class MethodsFFT {
 	}
 	
 }
+// TODO: zmienic robienie charta

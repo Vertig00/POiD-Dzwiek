@@ -10,30 +10,18 @@ import kosodrzewina.model.Sound;
 public class Run {
 
 	public static void mainRun(Sound args) {
-//		System.out.println("run:start");
-////		String path2 = "sounds/artificial/diff/1366Hz.wav";
-//		File file = new File(args[0]);
-//
-//		// Read
-//		System.out.println();
-//		Sound sound = readWav(file);
-//		sound.info();
-		
-		
 		//do GUI, jak chcesz wrócic do swojego odkomenduj powy¿sze i zmieñ main na String[]
 		Sound sound = args;
 		
 		// FFT
-		Sound modifiedSound = MethodsFFT.fourierSpectrum(sound);
+//		Sound modifiedSound = MethodsFFT.fourierSpectrum(sound);
+		// TODO: ZMIENIC METODE; WYCHODZI LISTA WIEC TRZEBA W GUI WYPISAC LISTE HZ
 		System.out.println("");
-		
-		// modifiedSound info
-//		modifiedSound.info();
-		
+
 		// Save
 		String pathOut2 = "sounds/generatedTone.wav";
 		File fileOut = new File(pathOut2);
-		saveWav(modifiedSound, fileOut);
+//		saveWav(modifiedSound, fileOut);
 		
 		System.out.println("run:end");
 	}
@@ -50,15 +38,13 @@ public class Run {
         Sound modifiedSound = MethodsFFT.generateSoundFourier(sound, partLength);
 		
         for(int i = 0; i < MethodsFFT.statPartsHz.length; i++) 
-        	System.out.println( (i+1) + ": " + MethodsFFT.statPartsHz[i] + " Hz");
+        	System.out.println( (i) + ": " + MethodsFFT.statPartsHz[i] + " Hz");
         
 		// Save
 		String pathOut2 = "sounds/generatedTones.wav";
 		File fileOut = new File(pathOut2);
 		saveWav(modifiedSound, fileOut);
 	}
-	
-	
 	
 	private static void outDoubles(double tab[]) {
 		System.out.println("Tab");
