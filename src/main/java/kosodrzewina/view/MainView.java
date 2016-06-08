@@ -55,7 +55,6 @@ public class MainView implements ActionListener{
 	JMenuItem loadFile;
 	JMenuItem closeApp;
 	private JButton btnPlay;
-	JButton saveSound;
 	JLabel fileName;
 	JLabel filePath;
 	InputStream in;
@@ -63,17 +62,27 @@ public class MainView implements ActionListener{
 	ChartPanel loadChartPanelLeft;
 	JFreeChart loadImageChart;
 	JComboBox<String> options;
+	JComboBox<Double> sampling;
 	JLabel frequencyLabel;
 	JButton doIt;
 	
 	byte[] soundTab = null;
-	String[] optionTab = {"zero-crossing","Upelszone zero-crossing","Widmo Fouriera"};
+	String[] optionTab = {"zero-crossing","Upelszone zero-crossing"};
+	Double[] samplingTab = {(double) 512,(double) 1024,(double) 2048,(double) 4096,(double) 8192};
 	
     AudioInputStream stream;
     AudioFormat format;
     DataLine.Info info;
     Clip clip;
     private JTextField dokl;
+    private JLabel lblProcent;
+    private JTextField tresholdDivider;
+    private JTextField minTreshold;
+    private JTextField maxesDiff;
+    JButton btnPrawo;
+    JButton btnLewo;
+    JButton fourierButton;
+    
 
 
 	public static void main(String[] args) {
@@ -134,11 +143,6 @@ public class MainView implements ActionListener{
 		filePath.setBounds(199, 11, 467, 14);
 		frame.getContentPane().add(filePath);
 		
-		saveSound = new JButton("Zapisz");
-		saveSound.addActionListener(this);
-		saveSound.setBounds(10, 137, 89, 23);
-		frame.getContentPane().add(saveSound);
-		
 		loadChartPanelLeft = new ChartPanel(loadImageChart);
 		loadChartPanelLeft.setBorder(new LineBorder(new Color(0, 0, 0)));
 		loadChartPanelLeft.setBounds(10, 213, 697, 280);
@@ -152,28 +156,92 @@ public class MainView implements ActionListener{
 		for (String string : optionTab) {
 			options.addItem(string);
 		}
-		options.setBounds(335, 36, 171, 20);
+		options.setBounds(335, 36, 133, 20);
 		frame.getContentPane().add(options);
 		
 		doIt = new JButton("Wykonaj");
 		doIt.setEnabled(false);
 		doIt.addActionListener(this);
-		doIt.setBounds(335, 71, 112, 23);
+		doIt.setBounds(335, 147, 112, 23);
 		frame.getContentPane().add(doIt);
 		
 		JLabel lblWynik = new JLabel("Wynik: ");
-		lblWynik.setBounds(220, 114, 105, 14);
+		lblWynik.setBounds(335, 188, 105, 14);
 		frame.getContentPane().add(lblWynik);
 		
 		frequencyLabel = new JLabel("");
-		frequencyLabel.setBounds(335, 114, 112, 14);
+		frequencyLabel.setBounds(450, 188, 112, 14);
 		frame.getContentPane().add(frequencyLabel);
 		
 		dokl = new JTextField();
-		dokl.setText("0");
-		dokl.setBounds(220, 72, 86, 20);
+		dokl.setText("1");
+		dokl.setBounds(335, 108, 86, 20);
 		frame.getContentPane().add(dokl);
 		dokl.setColumns(10);
+		
+		sampling = new JComboBox<Double>();
+		for (Double string : samplingTab) {
+			sampling.addItem(string);
+		}
+		sampling.setBounds(335, 72, 133, 20);
+		frame.getContentPane().add(sampling);
+		
+		JLabel lblPrbkowanie = new JLabel("Pr\u00F3bkowanie");
+		lblPrbkowanie.setBounds(220, 75, 105, 14);
+		frame.getContentPane().add(lblPrbkowanie);
+		
+		lblProcent = new JLabel("Procent (%)");
+		lblProcent.setBounds(220, 111, 105, 14);
+		frame.getContentPane().add(lblProcent);
+		
+		JLabel lblFourier = new JLabel("Fourier");
+		lblFourier.setBounds(590, 11, 46, 14);
+		frame.getContentPane().add(lblFourier);
+		
+		tresholdDivider = new JTextField();
+		tresholdDivider.setText("20");
+		tresholdDivider.setBounds(621, 36, 86, 20);
+		frame.getContentPane().add(tresholdDivider);
+		tresholdDivider.setColumns(10);
+		
+		minTreshold = new JTextField();
+		minTreshold.setText("8");
+		minTreshold.setColumns(10);
+		minTreshold.setBounds(621, 72, 86, 20);
+		frame.getContentPane().add(minTreshold);
+		
+		maxesDiff = new JTextField();
+		maxesDiff.setText("50");
+		maxesDiff.setColumns(10);
+		maxesDiff.setBounds(621, 108, 86, 20);
+		frame.getContentPane().add(maxesDiff);
+		
+		JLabel lblDivider = new JLabel("Divider");
+		lblDivider.setBounds(517, 39, 79, 14);
+		frame.getContentPane().add(lblDivider);
+		
+		JLabel lblMinimum_1 = new JLabel("Minimum");
+		lblMinimum_1.setBounds(517, 75, 79, 14);
+		frame.getContentPane().add(lblMinimum_1);
+		
+		JLabel lblMinimum = new JLabel("Minimum maxes");
+		lblMinimum.setBounds(517, 114, 79, 14);
+		frame.getContentPane().add(lblMinimum);
+		
+		fourierButton = new JButton("Wykonaj ");
+		fourierButton.setBounds(618, 147, 89, 23);
+		fourierButton.addActionListener(this);
+		frame.getContentPane().add(fourierButton);
+		
+		btnLewo = new JButton("Lewo");
+		btnLewo.addActionListener(this);
+		btnLewo.setBounds(10, 184, 89, 23);
+		frame.getContentPane().add(btnLewo);
+		
+		btnPrawo = new JButton("Prawo");
+		btnPrawo.addActionListener(this);
+		btnPrawo.setBounds(109, 184, 89, 23);
+		frame.getContentPane().add(btnPrawo);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -216,21 +284,32 @@ public class MainView implements ActionListener{
 			clip.stop();
 			clip.setMicrosecondPosition(0);
 			clip.start();
-		}else if(z == saveSound){
-//			FileSaver.saveWav(sound);
 		}else if(z == doIt){
+			Methods.setNumberProbe(Double.parseDouble(sampling.getSelectedItem().toString()));
+			System.out.println("Próbki: "+Methods.getNumberProbe());
 			if(options.getSelectedIndex() == 0){
 				Double frequency = Methods.zeroCrossingLine(sound);
 				frequencyLabel.setText(frequency.toString()+"Hz");
 			}else if(options.getSelectedIndex() == 1){
 				Double frequency = Methods.zeroCrossingLineUpdated(sound, Double.parseDouble(dokl.getText()));
 				frequencyLabel.setText(frequency.toString()+"Hz");
-			}else{
+			}
+			//fourier na starym obecnie nieu¿ywany
+			else{
 				Run.mainRun(sound);
 				double frequency = MethodsFFT.hzResult;
 //				Double frequency = Methods.zeroCrossingLineUpdated(sound, Double.parseDouble(dokl.getText()));
 				frequencyLabel.setText(frequency+"Hz");
 			}
+		}else if(z == fourierButton){
+			//wykonanie fouriera
+			//wyœwietlic frequency w elemencie frequencyLabel
+			
+			//frequencyLabel.setText(frequency+"Hz");
+		}else if(z == btnLewo){
+			//lewy guzik
+		}else if(z == btnPrawo){
+			//prawy guzik
 		}
 	}
 	
