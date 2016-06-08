@@ -19,8 +19,9 @@ public class App {
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setVisible(true);
 
-                String path = "sounds/artificial/diff/270Hz.wav";
-                String partLenght = "512";
+                //String path = "sounds/artificial/diff/270Hz.wav";
+                String path = "sounds/seq/DWK_violin.wav";
+                String partLenght = "1024";
                 String[] args = {path, partLenght};
                 Run.main(args);
                 //ChartPanel cp = MethodsFFT.chart();
