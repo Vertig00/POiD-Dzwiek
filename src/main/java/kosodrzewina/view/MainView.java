@@ -51,6 +51,8 @@ import javax.swing.JTextField;
 
 public class MainView implements ActionListener{
 
+	private int chartNumber = 0;
+	
 	private JFrame frame;
 	JMenuItem loadFile;
 	JMenuItem closeApp;
@@ -79,6 +81,10 @@ public class MainView implements ActionListener{
     private JTextField tresholdDivider;
     private JTextField minTreshold;
     private JTextField maxesDiff;
+    JLabel lblDivider;
+    JLabel lblMinimum_1;
+    JLabel lblMinimum;
+    
     JButton btnPrawo;
     JButton btnLewo;
     JButton fourierButton;
@@ -216,15 +222,15 @@ public class MainView implements ActionListener{
 		maxesDiff.setBounds(621, 108, 86, 20);
 		frame.getContentPane().add(maxesDiff);
 		
-		JLabel lblDivider = new JLabel("Divider");
+		lblDivider = new JLabel("DividerThres");
 		lblDivider.setBounds(517, 39, 79, 14);
 		frame.getContentPane().add(lblDivider);
 		
-		JLabel lblMinimum_1 = new JLabel("Minimum");
+		lblMinimum_1 = new JLabel("MinThres");
 		lblMinimum_1.setBounds(517, 75, 79, 14);
 		frame.getContentPane().add(lblMinimum_1);
 		
-		JLabel lblMinimum = new JLabel("Minimum maxes");
+		lblMinimum = new JLabel("minDiffMaxes");
 		lblMinimum.setBounds(517, 114, 79, 14);
 		frame.getContentPane().add(lblMinimum);
 		
@@ -295,23 +301,45 @@ public class MainView implements ActionListener{
 				frequencyLabel.setText(frequency.toString()+"Hz");
 			}
 			//fourier na starym obecnie nieu¿ywany
-			else{
-				Run.mainRun(sound);
-				double frequency = MethodsFFT.hzResult;
 //				Double frequency = Methods.zeroCrossingLineUpdated(sound, Double.parseDouble(dokl.getText()));
-				frequencyLabel.setText(frequency+"Hz");
-			}
 		}else if(z == fourierButton){
 			//wykonanie fouriera
-			//wyœwietlic frequency w elemencie frequencyLabel
+			int partLenght = (int) Double.parseDouble(sampling.getSelectedItem().toString());
 			
+			MethodsFFT.thresholdDivider = Double.parseDouble(minTreshold.getText());
+			MethodsFFT.minThreshold = Double.parseDouble(minTreshold.getText());
+			MethodsFFT.minMaxesDiff = Double.parseDouble(maxesDiff.getText());
+			
+			Run.fftSound(sound, partLenght);
+			System.out.println(MethodsFFT.thresholdDivider);
+			placeChart();
+			
+			//wyœwietlic frequency w elemencie frequencyLabel
 			//frequencyLabel.setText(frequency+"Hz");
-		}else if(z == btnLewo){
-			//lewy guzik
-		}else if(z == btnPrawo){
-			//prawy guzik
+			
+		}else outerloop: if(z == btnLewo){
+			if(chartNumber <= 0)
+				break outerloop;
+			chartNumber--;
+			placeChart();
+			
+		}else outerloop2: if(z == btnPrawo){
+			if(MethodsFFT.statPartsHz.length-1 <= 1)
+				break outerloop2;
+			chartNumber++;
+			placeChart();
+			
 		}
 	}
+	private void refreshChart() {
+		placeChart();
+		frame.getContentPane().remove(loadChartPanelLeft);
+		frame.getContentPane().add(loadChartPanelLeft);
+	}
+	private void placeChart() {
+		loadChartPanelLeft.setChart( MethodsFFT.chartShortNP(chartNumber, 4) );
+	}
+	
 	
 	//read sound in byte - to AudioInputStream
 	public byte[] readSound(AudioInputStream stream){

@@ -382,6 +382,28 @@ public class MethodsFFT {
 		
 		return cp;
 	}
+	public static JFreeChart chartShortNP(int index, int divider) {
+		double[] dataset = getMagnitude(index);
+		XYSeries series = new XYSeries("Magnitude part: "+index+", hz:"+statPartsHz[index]);
+		
+		double factor =(double) (fftFramesStatic.get(index).length/2) / staticSampleRate;
+		for(int i = 0; i <dataset.length/divider; i++)
+			series.add(i/factor, dataset[i]);
+		XYSeriesCollection data = new XYSeriesCollection(series);
+		
+		JFreeChart chart = ChartFactory.createXYLineChart(
+				"Spectrums",          // chart title
+				"X",
+				"Y",
+				data,                // data
+				PlotOrientation.VERTICAL,
+	            true,                // include legend
+	            true,
+	            false);
+
+		return chart;
+	}
+	
 	
 }
 // TODO: zmienic robienie charta
