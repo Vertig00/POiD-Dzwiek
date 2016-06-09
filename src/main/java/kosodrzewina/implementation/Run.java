@@ -26,7 +26,7 @@ public class Run {
 		System.out.println("run:end");
 	}
 	
-	public static void fftSound(Sound sound, int partLength) {
+	public static File fftSound(Sound sound, int partLength) {
 		// Method
 		Sound modifiedSound = MethodsFFT.generateSoundFourier(sound, partLength);
 		
@@ -38,6 +38,8 @@ public class Run {
 		String pathOut2 = "sounds/generatedTones.wav";
 		File fileOut = new File(pathOut2);
 		saveWav(modifiedSound, fileOut);
+		
+		return fileOut;
 	}
 	
 	public static void main(String[] args) {

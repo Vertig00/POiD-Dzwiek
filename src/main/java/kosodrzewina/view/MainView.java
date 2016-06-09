@@ -61,12 +61,14 @@ public class MainView implements ActionListener{
 	JLabel filePath;
 	InputStream in;
 	Sound sound;
+	File modifiedSound;
 	ChartPanel loadChartPanelLeft;
 	JFreeChart loadImageChart;
 	JComboBox<String> options;
 	JComboBox<Double> sampling;
 	JLabel frequencyLabel;
 	JButton doIt;
+	JButton playNewSound;
 	
 	byte[] soundTab = null;
 	String[] optionTab = {"zero-crossing","Upelszone zero-crossing"};
@@ -76,6 +78,7 @@ public class MainView implements ActionListener{
     AudioFormat format;
     DataLine.Info info;
     Clip clip;
+    Clip clip2;
     private JTextField dokl;
     private JLabel lblProcent;
     private JTextField tresholdDivider;
@@ -248,6 +251,11 @@ public class MainView implements ActionListener{
 		btnPrawo.addActionListener(this);
 		btnPrawo.setBounds(109, 184, 89, 23);
 		frame.getContentPane().add(btnPrawo);
+		
+		playNewSound = new JButton("Odtwórz");
+		playNewSound.addActionListener(this);
+		playNewSound.setBounds(400, 147, 89, 23);
+		frame.getContentPane().add(playNewSound);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -302,15 +310,37 @@ public class MainView implements ActionListener{
 			}
 			//fourier na starym obecnie nieu¿ywany
 //				Double frequency = Methods.zeroCrossingLineUpdated(sound, Double.parseDouble(dokl.getText()));
-		}else if(z == fourierButton){
+		}else if(z == playNewSound){
+		    try {
+                stream = AudioSystem.getAudioInputStream(modifiedSound);
+                format = stream.getFormat();
+                info = new DataLine.Info(Clip.class, format);
+                clip2 = (Clip) AudioSystem.getLine(info);
+                clip2.open(stream);
+            } catch (UnsupportedAudioFileException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            } catch (LineUnavailableException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+            		    
+	          clip2.stop();
+	          clip2.setMicrosecondPosition(0);
+	          clip2.start();
+		}
+		else if(z == fourierButton){
 			//wykonanie fouriera
 			int partLenght = (int) Double.parseDouble(sampling.getSelectedItem().toString());
 			
-			MethodsFFT.thresholdDivider = Double.parseDouble(minTreshold.getText());
+			MethodsFFT.thresholdDivider = Double.parseDouble(tresholdDivider.getText());
 			MethodsFFT.minThreshold = Double.parseDouble(minTreshold.getText());
 			MethodsFFT.minMaxesDiff = Double.parseDouble(maxesDiff.getText());
 			
-			Run.fftSound(sound, partLenght);
+			modifiedSound = Run.fftSound(sound, partLenght);
 			System.out.println(MethodsFFT.thresholdDivider);
 			placeChart();
 			
@@ -337,7 +367,7 @@ public class MainView implements ActionListener{
 		frame.getContentPane().add(loadChartPanelLeft);
 	}
 	private void placeChart() {
-		loadChartPanelLeft.setChart( MethodsFFT.chartShortNP(chartNumber, 4) );
+		loadChartPanelLeft.setChart( MethodsFFT.chartShortNP(chartNumber, 2) );
 	}
 	
 	

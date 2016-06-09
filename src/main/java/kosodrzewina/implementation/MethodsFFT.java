@@ -35,6 +35,7 @@ public class MethodsFFT {
 		
 		// #1. Clone original sound
 		Sound modifiedSound = new Sound(originalSound);
+		modifiedSound.setNumChannels(1);
 		
 		// #2. Divide original sound
 		List<double[]> soundParts = divideSound(originalSound, partLength);
@@ -220,7 +221,7 @@ public class MethodsFFT {
 		threshold = threshold / thresholdDivider;
 		if(threshold < minThreshold) threshold = minThreshold;
 		
-		// take maxes only if( max > factor )
+		// take maxes only if( max >= factor )
 		List<Integer> sievedMaxes = new ArrayList<Integer>();
 		for(int i = 0; i < maxes.size(); i++)
 			if(magnitude[maxes.get(i)] >= threshold)
@@ -230,7 +231,8 @@ public class MethodsFFT {
 		if(sievedMaxes.size()<3)
 			return 0;
 		List<Double> dists = new ArrayList<Double>();
-		double[] distances = new double[sievedMaxes.size()-2];	
+		double[] distances;
+		dists.add( (double)sievedMaxes.get(0) );
 		for(int i = 0; i < sievedMaxes.size()-2; i++)
 			if( (sievedMaxes.get(i+1) - sievedMaxes.get(i))/factor > minMaxesDiff ) {
 //				distances[i] = sievedMaxes.get(i+1) - sievedMaxes.get(i);
@@ -243,7 +245,10 @@ public class MethodsFFT {
 			distances[i] = dists.get(i);
 		// sort and median
 		Arrays.sort(distances);
-		index = Math.round( (float) distances[ distances.length/2 ]  );
+		if( distances[ distances.length/2 ]/factor < 2000 )
+		    index = Math.round( (float) distances[ distances.length/2 ]  );
+		else
+		    index = 0;
 		
 		return index;
 	}
