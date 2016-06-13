@@ -254,7 +254,7 @@ public class MainView implements ActionListener{
 		
 		playNewSound = new JButton("Odtwórz");
 		playNewSound.addActionListener(this);
-		playNewSound.setBounds(400, 147, 89, 23);
+		playNewSound.setBounds(517, 147, 89, 23);
 		frame.getContentPane().add(playNewSound);
 	}
 
