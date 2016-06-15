@@ -27,13 +27,19 @@ import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import org.jfree.chart.JFreeChart;
 import org.omg.CosNaming.NamingContextExtPackage.AddressHelper;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import kosodrzewina.implementation.FileLoader;
 import kosodrzewina.implementation.ImpulseFilter;
 import kosodrzewina.implementation.MethodsFFT;
+import kosodrzewina.implementation.Task4Implementation;
 import kosodrzewina.model.Sound;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
+
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import javax.swing.border.LineBorder;
 import java.awt.Color;
@@ -43,6 +49,10 @@ public class Zadanie4 extends JPanel implements ActionListener{
 
 	private static final long serialVersionUID = 1L;
 	private int chartNumber = 0;
+	/**
+	 * Vars
+	 */
+	double[] phase;
 	
 	private JFrame frame;
 	JMenuItem loadFile;
@@ -282,14 +292,20 @@ public class Zadanie4 extends JPanel implements ActionListener{
 			clip.setMicrosecondPosition(0);
 			clip.start();
 		}else if(z == doIt){
+			System.out.println("elo1");
 			int window = windowBox.getSelectedIndex();	//1 -von, 2 -hamm, 0 - kwadr
 			int zeroFeed = zeroPlug.getSelectedIndex();	//wype³nianie zerami
 			double M = Double.parseDouble(windowLenghtInput.getText());
 			double R = Double.parseDouble(przesuniecie.getText());
 			double L = Double.parseDouble(filtrLenghtField.getText());
 			double frequencyCut = Double.parseDouble(frequencyCutField.getText());
-			
+			System.out.println("elo2");
 			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
+			System.out.println("elo3");
+			phase = Task4Implementation.testPhaseFFT(sound, 2048);
+			System.out.println(phase);
+			placeChart();
+
 		}else outerloop: if(z == previous){
 			if(chartNumber <= 0)
 				break outerloop;
@@ -301,7 +317,6 @@ public class Zadanie4 extends JPanel implements ActionListener{
 				break outerloop2;
 			chartNumber++;
 //			placeChart();
-			
 		}
 	}
 	
@@ -327,4 +342,60 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		return tab;
 	}
 
+	/**
+	 * Charts Methods
+	 */
+	public static JFreeChart chartShortNP(double[] phase, long sampleRate, int divider) {
+		XYSeries series = new XYSeries("Phase Series");
+		
+		double factor =(double) phase.length / sampleRate;
+		for(int i = 0; i <phase.length/divider; i++)
+			series.add(i/factor, phase[i]);
+		XYSeriesCollection data = new XYSeriesCollection(series);
+		
+		JFreeChart chart = ChartFactory.createXYLineChart(
+				"Phase Title",          // chart title
+				"X",
+				"Y",
+				data,                // data
+				PlotOrientation.VERTICAL,
+	            true,                // include legend
+	            true,
+	            false);
+
+		return chart;
+	}
+	private void refreshChart() {
+		placeChart();
+		frame.getContentPane().remove(chartPanel);
+		frame.getContentPane().add(chartPanel);
+	}
+	private void placeChart() {
+		chartPanel.setChart( chartShortNP(phase, sound.getSampleRate(), 2) );
+	}
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
