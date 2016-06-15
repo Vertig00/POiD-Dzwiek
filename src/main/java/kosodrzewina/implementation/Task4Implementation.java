@@ -75,24 +75,42 @@ public class Task4Implementation {
 		
 		return phase;
 	}
+	private static double[] calcSpectrumMagnitude(double[] fft) {
+		int size = fft.length/2;
+		double[] magnitude = new double[size];
+		
+		for (int i = 0; i < size; i++)
+			magnitude[i] = Math.sqrt(Math.pow(fft[2 * i], 2) + Math.pow(fft[2 * i + 1], 2));
+
+		return magnitude;
+	}
 	/**
 	 * Tests
 	 */
-	public static double[] testPhaseFFT(Sound originalSound, int partLength) {
+	public static List<double[]> testPhaseFFT(Sound originalSound, int partLength) {
+		List<double[]> resultData = new ArrayList<double[]>();
+		
 		// #1. Clone original sound
 		Sound modifiedSound = new Sound(originalSound);
 		modifiedSound.setNumChannels(1);
 		
-		// #2. Divide original sound
+		// #2. Divide original sound 	**TODO: windows
 		List<double[]> soundParts = divideSound(originalSound, partLength);
 		
-		// 3#. Calculate fft (for 10th element)
-		double[] fftFrames = calcFFT( soundParts.get(20), originalSound.getSampleRate() );
+		double[] fft, spectrum;
+		for(int i = 0; i < soundParts.size(); i++) {
+			
+			// 3#. Calculate fft
+			fft = calcFFT( soundParts.get(i), originalSound.getSampleRate() );
+			
+			// 4#. Calculate spectrum
+			spectrum = calcSpectrumMagnitude(fft);
+			resultData.add(spectrum);
+
+		}
 		
-		// 4#. Calculate phase
-		double[] phase = calcSpectrumPhase(fftFrames);
 		
-		return phase;	
+		return resultData;	
 	}
 	
 	

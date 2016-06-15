@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -47,7 +48,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	/**
 	 * Vars
 	 */
-	double[] phase;
+	List<double[]> chartData;
 	
 	private JFrame frame;
 	JMenuItem loadFile;
@@ -298,22 +299,20 @@ public class Zadanie4 extends JPanel implements ActionListener{
 //
 //			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
 
-			System.out.println("elo3");
-			phase = Task4Implementation.testPhaseFFT(sound, 512);
-			System.out.println(phase);
+			chartData = Task4Implementation.testPhaseFFT(sound, 512);
 			placeChart();
 
 		}else outerloop: if(z == previous){
 			if(chartNumber <= 0)
 				break outerloop;
 			chartNumber--;
-//			placeChart();
+			refreshChart();
 			
 		}else outerloop2: if(z == next){
-			if(MethodsFFT.statPartsHz.length-1 <= 1)
+			if(chartData.size() -1 <= chartNumber)
 				break outerloop2;
 			chartNumber++;
-//			placeChart();
+			refreshChart();
 		}
 	}
 	
@@ -342,16 +341,16 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	/**
 	 * Charts Methods
 	 */
-	public static JFreeChart chartShortNP(double[] phase, long sampleRate, int divider) {
-		XYSeries series = new XYSeries("Phase Series");
+	public JFreeChart chartShortNP(double[] dataArray, long sampleRate, int divider) {
+		XYSeries series = new XYSeries("Data chart id: " + chartNumber + "/" + (chartData.size()-1) );
 		
-		double factor =(double) phase.length / sampleRate;
-		for(int i = 0; i <phase.length/divider; i++)
-			series.add(i/factor, phase[i]);
+		double factor =(double) dataArray.length / sampleRate;
+		for(int i = 0; i <dataArray.length/divider; i++)
+			series.add(i/factor, dataArray[i]);
 		XYSeriesCollection data = new XYSeriesCollection(series);
 		
 		JFreeChart chart = ChartFactory.createXYLineChart(
-				"Phase Title",          // chart title
+				"Data Chart",          // chart title
 				"X",
 				"Y",
 				data,                // data
@@ -368,7 +367,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		frame.getContentPane().add(chartPanel);
 	}
 	private void placeChart() {
-		chartPanel.setChart( chartShortNP(phase, sound.getSampleRate(), 2) );
+		chartPanel.setChart( chartShortNP(chartData.get(chartNumber), sound.getSampleRate(), 2) );
 	}
 
 }
