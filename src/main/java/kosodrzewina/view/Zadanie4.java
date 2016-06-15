@@ -3,6 +3,10 @@ package kosodrzewina.view;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -22,17 +26,24 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import org.jfree.chart.JFreeChart;
+import org.omg.CosNaming.NamingContextExtPackage.AddressHelper;
+
 import kosodrzewina.implementation.FileLoader;
 import kosodrzewina.implementation.ImpulseFilter;
+import kosodrzewina.implementation.MethodsFFT;
 import kosodrzewina.model.Sound;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import org.jfree.chart.ChartPanel;
 import javax.swing.border.LineBorder;
 import java.awt.Color;
+import javax.swing.JPanel;
 
-public class Zadanie4 implements ActionListener{
+public class Zadanie4 extends JPanel implements ActionListener{
 
+	private static final long serialVersionUID = 1L;
+	private int chartNumber = 0;
+	
 	private JFrame frame;
 	JMenuItem loadFile;
 	JMenuItem closeApp;
@@ -71,6 +82,8 @@ public class Zadanie4 implements ActionListener{
     private JLabel lblCzestotliwoscOdciecia;
     private JTextField frequencyCutField;
     private ChartPanel chartPanel;
+    private JButton previous;
+    private JButton next;
 
 	/**
 	 * Launch the application.
@@ -97,6 +110,7 @@ public class Zadanie4 implements ActionListener{
 
 	private void initialize() {
 		frame = new JFrame();
+		frame.requestFocusInWindow();
 		frame.setBounds(100, 100, 733, 564);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -225,6 +239,16 @@ public class Zadanie4 implements ActionListener{
 		chartPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
 		chartPanel.setBounds(10, 213, 697, 280);
 		frame.getContentPane().add(chartPanel);
+		
+		previous = new JButton("Poprzedni");
+		previous.addActionListener(this);
+		previous.setBounds(10, 179, 89, 23);
+		frame.getContentPane().add(previous);
+		
+		next = new JButton("Nast\u0119pny");
+		next.addActionListener(this);
+		next.setBounds(109, 179, 89, 23);
+		frame.getContentPane().add(next);
 
 	}
 
@@ -266,6 +290,18 @@ public class Zadanie4 implements ActionListener{
 			double frequencyCut = Double.parseDouble(frequencyCutField.getText());
 			
 			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
+		}else outerloop: if(z == previous){
+			if(chartNumber <= 0)
+				break outerloop;
+			chartNumber--;
+//			placeChart();
+			
+		}else outerloop2: if(z == next){
+			if(MethodsFFT.statPartsHz.length-1 <= 1)
+				break outerloop2;
+			chartNumber++;
+//			placeChart();
+			
 		}
 	}
 	
@@ -290,4 +326,5 @@ public class Zadanie4 implements ActionListener{
 		}
 		return tab;
 	}
+
 }
