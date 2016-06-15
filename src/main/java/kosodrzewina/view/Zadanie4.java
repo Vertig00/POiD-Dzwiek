@@ -215,6 +215,7 @@ public class Zadanie4 implements ActionListener{
 		doIt = new JButton("Wykonaj");
 		doIt.setBounds(326, 139, 112, 23);
 		frame.getContentPane().add(doIt);
+		doIt.addActionListener(this);
 		
 		lblDugoFiltraL = new JLabel("D\u0142ugo\u015B filtra L");
 		lblDugoFiltraL.setBounds(448, 36, 103, 14);
@@ -271,18 +272,18 @@ public class Zadanie4 implements ActionListener{
 			clip.setMicrosecondPosition(0);
 			clip.start();
 		}else if(z == doIt){
-			System.out.println("elo1");
-			int window = windowBox.getSelectedIndex();	//1 -von, 2 -hamm, 0 - kwadr
-			int zeroFeed = zeroPlug.getSelectedIndex();	//wype³nianie zerami
-			double M = Double.parseDouble(windowLenghtInput.getText());
-			double R = Double.parseDouble(przesuniecie.getText());
-			double L = Double.parseDouble(filtrLenghtField.getText());
-			double frequencyCut = Double.parseDouble(frequencyCutField.getText());
-			System.out.println("elo2");
-			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
+
+//			int window = windowBox.getSelectedIndex();	//1 -von, 2 -hamm, 0 - kwadr
+//			int zeroFeed = zeroPlug.getSelectedIndex();	//wype³nianie zerami
+//			double M = Double.parseDouble(windowLenghtInput.getText());
+//			double R = Double.parseDouble(przesuniecie.getText());
+//			double L = Double.parseDouble(filtrLenghtField.getText());
+//			double frequencyCut = Double.parseDouble(frequencyCutField.getText());
+//
+//			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
 			
 			System.out.println("elo3");
-			phase = Task4Implementation.testPhaseFFT(sound, 2048);
+			phase = Task4Implementation.testPhaseFFT(sound, 512);
 			System.out.println(phase);
 			placeChart();
 		}

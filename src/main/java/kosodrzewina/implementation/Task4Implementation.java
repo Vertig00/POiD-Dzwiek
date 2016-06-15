@@ -87,7 +87,7 @@ public class Task4Implementation {
 		List<double[]> soundParts = divideSound(originalSound, partLength);
 		
 		// 3#. Calculate fft (for 10th element)
-		double[] fftFrames = calcFFT( soundParts.get(10), originalSound.getSampleRate() );
+		double[] fftFrames = calcFFT( soundParts.get(20), originalSound.getSampleRate() );
 		
 		// 4#. Calculate phase
 		double[] phase = calcSpectrumPhase(fftFrames);
