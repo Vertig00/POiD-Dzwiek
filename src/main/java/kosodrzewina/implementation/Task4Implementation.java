@@ -34,10 +34,10 @@ public class Task4Implementation {
 			
 			// 5#. Results
 			// FFT Magnitude
-			spectrum = calcSpectrumMagnitude(fft);
+			spectrum = calcSpectrumPhase(fft);
 			fftMag.add(spectrum);
 			// FFTe Magnitude
-			spectrum = calcSpectrumMagnitude(fftE);
+			spectrum = calcSpectrumPhase(fftE);
 			fftEMag.add(spectrum);
 
 		}
