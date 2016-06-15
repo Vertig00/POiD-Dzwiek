@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -48,7 +50,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	/**
 	 * Vars
 	 */
-	List<double[]> chartData;
+	List<double[][]> chartData;
 	
 	private JFrame frame;
 	JMenuItem loadFile;
@@ -256,7 +258,6 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		next.addActionListener(this);
 		next.setBounds(109, 179, 89, 23);
 		frame.getContentPane().add(next);
-
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -299,7 +300,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 //
 //			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
 
-			chartData = Task4Implementation.testPhaseFFT(sound, 512);
+			chartData = Task4Implementation.run(sound, 2048, 1024);
 			placeChart();
 
 		}else outerloop: if(z == previous){
@@ -309,7 +310,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 			refreshChart();
 			
 		}else outerloop2: if(z == next){
-			if(chartData.size() -1 <= chartNumber)
+			if(chartData.get(0).length -1 <= chartNumber)
 				break outerloop2;
 			chartNumber++;
 			refreshChart();
@@ -341,16 +342,26 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	/**
 	 * Charts Methods
 	 */
-	public JFreeChart chartShortNP(double[] dataArray, long sampleRate, int divider) {
-		XYSeries series = new XYSeries("Data chart id: " + chartNumber + "/" + (chartData.size()-1) );
+	public JFreeChart chartShortNP(int chartNumber, long sampleRate, int divider) {
+		XYSeriesCollection data = new XYSeriesCollection();
 		
-		double factor =(double) dataArray.length / sampleRate;
-		for(int i = 0; i <dataArray.length/divider; i++)
-			series.add(i/factor, dataArray[i]);
-		XYSeriesCollection data = new XYSeriesCollection(series);
+		XYSeries series;
+		double factor;
+		double[] dataArray;
+		for(int i = 0; i < chartData.size(); i++) {
+			series = new XYSeries( titles[i] );
+			dataArray = chartData.get(i)[chartNumber];
+			factor =(double) dataArray.length / sampleRate;
+			
+			for(int j = 0; j <dataArray.length/divider; j++)
+				series.add(j/factor, dataArray[j]);
+			
+			data.addSeries(series);
+		}
+		
 		
 		JFreeChart chart = ChartFactory.createXYLineChart(
-				"Data Chart",          // chart title
+				"Data Chart" + " id: " + chartNumber + "/" + (chartData.get(0).length), // chart title
 				"X",
 				"Y",
 				data,                // data
@@ -367,9 +378,13 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		frame.getContentPane().add(chartPanel);
 	}
 	private void placeChart() {
-		chartPanel.setChart( chartShortNP(chartData.get(chartNumber), sound.getSampleRate(), 2) );
+		chartPanel.setChart( chartShortNP(chartNumber, sound.getSampleRate(), 2) );
 	}
 
+	String[] titles = {
+			"FFT Magnitude", 
+			"FFTE Magnitude"
+			};
 }
 
 
