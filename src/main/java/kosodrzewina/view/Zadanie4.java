@@ -119,7 +119,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	private void initialize() {
 		frame = new JFrame();
 		frame.requestFocusInWindow();
-		frame.setBounds(100, 100, 733, 564);
+		frame.setBounds(100, 100, 733, 737);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -177,7 +177,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		for (Double string : samplingTab) {
 			framesBox.addItem(string);
 		}
-		framesBox.setEnabled(false);
+//		framesBox.setEnabled(false);
 		framesBox.setBounds(326, 58, 112, 20);
 		frame.getContentPane().add(framesBox);
 		
@@ -246,7 +246,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		
 		chartPanel = new ChartPanel((JFreeChart) null);
 		chartPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
-		chartPanel.setBounds(10, 213, 697, 280);
+		chartPanel.setBounds(10, 213, 697, 222);
 		frame.getContentPane().add(chartPanel);
 		
 		previous = new JButton("Poprzedni");
@@ -258,6 +258,11 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		next.addActionListener(this);
 		next.setBounds(109, 179, 89, 23);
 		frame.getContentPane().add(next);
+		
+		ChartPanel chartPanel2 = new ChartPanel((JFreeChart) null);
+		chartPanel2.setBorder(new LineBorder(new Color(0, 0, 0)));
+		chartPanel2.setBounds(10, 444, 697, 222);
+		frame.getContentPane().add(chartPanel2);
 	}
 
 	public void actionPerformed(ActionEvent e) {
