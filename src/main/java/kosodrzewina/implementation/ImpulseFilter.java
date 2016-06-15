@@ -40,7 +40,7 @@ public class ImpulseFilter {
 				double counter = Math.sin( ((2*Math.PI*fc)/fs)*(i-(L-1)/2) );
 				double denominator = Math.PI*(i-(L-1)/2);
 				double result = counter/denominator;
-				parameters.add(denominator);
+				parameters.add(result);
 			}
 		}
 		return parameters;
@@ -61,10 +61,10 @@ public class ImpulseFilter {
 		return 0.54-0.46*Math.cos(counter/denominator);
 	}
 	
-	private double rectangleWindow(){
+	private double rectangleWindow(int n){
 		
 		//TODO: napisac warunek
-		if(true){
+		if(n > -1 && n < M){
 			return 1;
 		}else{
 			return 0;
@@ -72,14 +72,16 @@ public class ImpulseFilter {
 	}
 	
 	//rodzaj okna
-	private void getWindow(int window){
+	private double getSelectedWindow(int n){
+		double windowValue = 0;
 		if(window == 0){
-//			rectangleWindow();
+			windowValue = rectangleWindow(n);
 		}else if(window == 1){
-//			HannWindow();
+			windowValue = HannWindow(n);
 		}else if(window ==2){
-//			HammingWindow();
+			windowValue = HammingWindow(n);
 		}
+		return windowValue;
 	}
 
 

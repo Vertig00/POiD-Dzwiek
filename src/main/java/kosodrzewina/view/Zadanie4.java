@@ -27,6 +27,9 @@ import kosodrzewina.implementation.ImpulseFilter;
 import kosodrzewina.model.Sound;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import org.jfree.chart.ChartPanel;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
 
 public class Zadanie4 implements ActionListener{
 
@@ -67,6 +70,7 @@ public class Zadanie4 implements ActionListener{
     private JTextField filtrLenghtField;
     private JLabel lblCzestotliwoscOdciecia;
     private JTextField frequencyCutField;
+    private ChartPanel chartPanel;
 
 	/**
 	 * Launch the application.
@@ -216,6 +220,11 @@ public class Zadanie4 implements ActionListener{
 		frequencyCutField.setColumns(10);
 		frequencyCutField.setBounds(561, 58, 112, 20);
 		frame.getContentPane().add(frequencyCutField);
+		
+		chartPanel = new ChartPanel((JFreeChart) null);
+		chartPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
+		chartPanel.setBounds(10, 213, 697, 280);
+		frame.getContentPane().add(chartPanel);
 
 	}
 
