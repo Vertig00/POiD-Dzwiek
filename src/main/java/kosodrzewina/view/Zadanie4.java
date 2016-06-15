@@ -1,5 +1,6 @@
 package kosodrzewina.view;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,39 +9,41 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.JTextField;
+import javax.swing.border.LineBorder;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import kosodrzewina.implementation.FileLoader;
-import kosodrzewina.implementation.ImpulseFilter;
 import kosodrzewina.implementation.MethodsFFT;
 import kosodrzewina.implementation.Task4Implementation;
 import kosodrzewina.model.Sound;
-import javax.swing.JComboBox;
-import javax.swing.JTextField;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import javax.swing.border.LineBorder;
-import java.awt.Color;
+public class Zadanie4 extends JPanel implements ActionListener{
 
-public class Zadanie4 implements ActionListener{
-
+	private static final long serialVersionUID = 1L;
+	private int chartNumber = 0;
 	/**
 	 * Vars
 	 */
@@ -84,6 +87,8 @@ public class Zadanie4 implements ActionListener{
     private JLabel lblCzestotliwoscOdciecia;
     private JTextField frequencyCutField;
     private ChartPanel chartPanel;
+    private JButton previous;
+    private JButton next;
 
 	/**
 	 * Launch the application.
@@ -110,6 +115,7 @@ public class Zadanie4 implements ActionListener{
 
 	private void initialize() {
 		frame = new JFrame();
+		frame.requestFocusInWindow();
 		frame.setBounds(100, 100, 733, 564);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -239,6 +245,16 @@ public class Zadanie4 implements ActionListener{
 		chartPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
 		chartPanel.setBounds(10, 213, 697, 280);
 		frame.getContentPane().add(chartPanel);
+		
+		previous = new JButton("Poprzedni");
+		previous.addActionListener(this);
+		previous.setBounds(10, 179, 89, 23);
+		frame.getContentPane().add(previous);
+		
+		next = new JButton("Nast\u0119pny");
+		next.addActionListener(this);
+		next.setBounds(109, 179, 89, 23);
+		frame.getContentPane().add(next);
 
 	}
 
@@ -281,11 +297,23 @@ public class Zadanie4 implements ActionListener{
 //			double frequencyCut = Double.parseDouble(frequencyCutField.getText());
 //
 //			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
-			
+
 			System.out.println("elo3");
 			phase = Task4Implementation.testPhaseFFT(sound, 512);
 			System.out.println(phase);
 			placeChart();
+
+		}else outerloop: if(z == previous){
+			if(chartNumber <= 0)
+				break outerloop;
+			chartNumber--;
+//			placeChart();
+			
+		}else outerloop2: if(z == next){
+			if(MethodsFFT.statPartsHz.length-1 <= 1)
+				break outerloop2;
+			chartNumber++;
+//			placeChart();
 		}
 	}
 	
@@ -342,7 +370,7 @@ public class Zadanie4 implements ActionListener{
 	private void placeChart() {
 		chartPanel.setChart( chartShortNP(phase, sound.getSampleRate(), 2) );
 	}
-	
+
 }
 
 

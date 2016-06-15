@@ -32,7 +32,7 @@ public class ImpulseFilter {
 	
 	
 	//wyznaczenie wspó³czynników
-	private List<Double> designateParametersH(){
+	public List<Double> designateParametersH(){
 		for (int i = 0; i < L-1; i++) {
 			if(i == (L-1)/2)
 				parameters.add(2*fc/fs);
@@ -72,7 +72,7 @@ public class ImpulseFilter {
 	}
 	
 	//rodzaj okna
-	private double getSelectedWindow(int n){
+	public double getSelectedWindow(int n){
 		double windowValue = 0;
 		if(window == 0){
 			windowValue = rectangleWindow(n);
@@ -82,6 +82,14 @@ public class ImpulseFilter {
 			windowValue = HammingWindow(n);
 		}
 		return windowValue;
+	}
+	
+	public static List<Double> fill0(int lenght){
+		List<Double> list = new ArrayList<Double>();
+		for (int i = 0; i < lenght; i++) {
+			list.set(i, (double) 0);
+		}
+		return list;
 	}
 
 
