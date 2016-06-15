@@ -15,6 +15,8 @@ public class Task4Implementation {
 		List<double[][]> resultData = new ArrayList<double[][]>();
 		List<double[]> fftMag = new ArrayList<double[]>();
 		List<double[]> fftEMag = new ArrayList<double[]>();
+		List<double[]> fftPha = new ArrayList<double[]>();
+		List<double[]> fftEPha = new ArrayList<double[]>();
 
 		// #1. Clone original sound
 		Sound modifiedSound = new Sound(originalSound);
@@ -33,17 +35,26 @@ public class Task4Implementation {
 			fftE = multipyDFTwithE(fft, i, R);
 			
 			// 5#. Results
+			
 			// FFT Magnitude
-			spectrum = calcSpectrumPhase(fft);
+			spectrum = calcSpectrumMagnitude(fft);
 			fftMag.add(spectrum);
 			// FFTe Magnitude
-			spectrum = calcSpectrumPhase(fftE);
+			spectrum = calcSpectrumMagnitude(fftE);
 			fftEMag.add(spectrum);
+			// FFT Magnitude
+			spectrum = calcSpectrumPhase(fft);
+			fftPha.add(spectrum);
+			// FFTe Magnitude
+			spectrum = calcSpectrumPhase(fftE);
+			fftEPha.add(spectrum);
 
 		}
 		
 		resultData.add( listToDouble2d(fftMag) );
-		resultData.add( listToDouble2d(fftEMag)  );
+		resultData.add( listToDouble2d(fftEMag) );
+		resultData.add( listToDouble2d(fftPha) );
+		resultData.add( listToDouble2d(fftEPha) );
 		return resultData;
 	}
 	/**
