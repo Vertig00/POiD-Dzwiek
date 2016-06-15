@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.CacheRequest;
 import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
@@ -90,6 +91,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
     private JLabel lblCzestotliwoscOdciecia;
     private JTextField frequencyCutField;
     private ChartPanel chartPanel;
+    private ChartPanel chartPanel2;
     private JButton previous;
     private JButton next;
 
@@ -259,7 +261,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		next.setBounds(109, 179, 89, 23);
 		frame.getContentPane().add(next);
 		
-		ChartPanel chartPanel2 = new ChartPanel((JFreeChart) null);
+		chartPanel2 = new ChartPanel((JFreeChart) null);
 		chartPanel2.setBorder(new LineBorder(new Color(0, 0, 0)));
 		chartPanel2.setBounds(10, 444, 697, 222);
 		frame.getContentPane().add(chartPanel2);
@@ -306,19 +308,19 @@ public class Zadanie4 extends JPanel implements ActionListener{
 //			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
 
 			chartData = Task4Implementation.run(sound, 2048, 1024);
-			placeChart();
+			placeAllCharts();
 
 		}else outerloop: if(z == previous){
 			if(chartNumber <= 0)
 				break outerloop;
 			chartNumber--;
-			refreshChart();
+			refreshAllCharts();
 			
 		}else outerloop2: if(z == next){
 			if(chartData.get(0).length -1 <= chartNumber)
 				break outerloop2;
 			chartNumber++;
-			refreshChart();
+			refreshAllCharts();
 		}
 	}
 	
@@ -347,13 +349,13 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	/**
 	 * Charts Methods
 	 */
-	public JFreeChart chartShortNP(int chartNumber, long sampleRate, int divider) {
+	public JFreeChart chartShortNP(int chartNumber, long sampleRate, int divider, int[] indexes) {
 		XYSeriesCollection data = new XYSeriesCollection();
 		
 		XYSeries series;
 		double factor;
 		double[] dataArray;
-		for(int i = 0; i < chartData.size(); i++) {
+		for(int i : indexes) {
 			series = new XYSeries( titles[i] );
 			dataArray = chartData.get(i)[chartNumber];
 			factor =(double) dataArray.length / sampleRate;
@@ -377,18 +379,29 @@ public class Zadanie4 extends JPanel implements ActionListener{
 
 		return chart;
 	}
-	private void refreshChart() {
-		placeChart();
+	private void refreshChart(ChartPanel chartPanel, int[] args) {
+		placeChart(chartPanel, args);
 		frame.getContentPane().remove(chartPanel);
 		frame.getContentPane().add(chartPanel);
 	}
-	private void placeChart() {
-		chartPanel.setChart( chartShortNP(chartNumber, sound.getSampleRate(), 2) );
+	private void placeChart(ChartPanel chartPanel, int[] args) {
+		chartPanel.setChart( chartShortNP(chartNumber, sound.getSampleRate(), 2, args ) );
 	}
-
+	private void refreshAllCharts() {
+		placeAllCharts();
+		refreshChart( chartPanel, new int[]{0,1} );
+		refreshChart( chartPanel2, new int[]{2,3} );
+	}
+	private void placeAllCharts() {
+		placeChart( chartPanel, new int[]{0,1} );
+		placeChart( chartPanel2, new int[]{2,3} );
+	}
+	
 	String[] titles = {
 			"FFT Magnitude", 
-			"FFTE Magnitude"
+			"FFTE Magnitude",
+			"FFT Phase", 
+			"FFTE Phase"
 			};
 }
 
