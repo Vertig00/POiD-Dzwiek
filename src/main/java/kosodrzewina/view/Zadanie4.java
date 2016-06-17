@@ -12,9 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.CacheRequest;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
@@ -46,7 +44,6 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import kosodrzewina.implementation.FileLoader;
-import kosodrzewina.implementation.MethodsFFT;
 import kosodrzewina.implementation.Task4Implementation;
 import kosodrzewina.model.Sound;
 import javax.swing.JTabbedPane;
@@ -155,22 +152,140 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		closeApp.addActionListener(this);
 		mnOpcje.add(closeApp);
 		frame.getContentPane().setLayout(null);
-//		for (String string : optionTab) {
-//			windowBox.addItem(string);
-//		}
-//		for (Double string : samplingTab) {
-//			framesBox.addItem(string);
-//		}
-//		for (String string : filtrTab) {
-//			filtrBox.addItem(string);
-//		}
-//		for (String string : zeroPlugTab) {
-//			zeroPlug.addItem(string);
-//		}
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBounds(10, 93, 864, 504);
 		frame.getContentPane().add(tabbedPane);
+		
+		//-----------------------------------  FILTR
+		Filtr = new JPanel();
+		tabbedPane.addTab("Filtr \"impulsowy\"", null, Filtr, null);
+		Filtr.setLayout(null);
+		
+		windowBox = new JComboBox<String>();
+		windowBox.setBounds(679, 84, 99, 20);
+		Filtr.add(windowBox);
+		
+		framesBox = new JComboBox<Double>();
+		framesBox.setBounds(679, 53, 99, 20);
+		Filtr.add(framesBox);
+		
+		filtrBox = new JComboBox<String>();
+		filtrBox.setBounds(679, 115, 99, 20);
+		Filtr.add(filtrBox);
+		
+		zeroPlug = new JComboBox<String>();
+		zeroPlug.setBounds(679, 22, 99, 20);
+		Filtr.add(zeroPlug);
+		
+		for (String string : optionTab) {
+			windowBox.addItem(string);
+		}
+		for (Double string : samplingTab) {
+			framesBox.addItem(string);
+		}
+		for (String string : filtrTab) {
+			filtrBox.addItem(string);
+		}
+		for (String string : zeroPlugTab) {
+			zeroPlug.addItem(string);
+		}
+		
+		chartPanel2 = new ChartPanel((JFreeChart) null);
+		chartPanel2.setBounds(0, 183, 421, 293);
+		Filtr.add(chartPanel2);
+		chartPanel2.setBorder(new LineBorder(new Color(0, 0, 0)));
+		
+		filtrLenghtField = new JTextField();
+		filtrLenghtField.setBounds(212, 97, 101, 20);
+		Filtr.add(filtrLenghtField);
+		filtrLenghtField.setColumns(10);
+		
+		lblCzestotliwoscOdciecia = new JLabel("Czestotliwosc odciecia ");
+		lblCzestotliwoscOdciecia.setBounds(49, 72, 153, 14);
+		Filtr.add(lblCzestotliwoscOdciecia);
+		
+		frequencyCutField = new JTextField();
+		frequencyCutField.setBounds(212, 72, 101, 20);
+		Filtr.add(frequencyCutField);
+		frequencyCutField.setColumns(10);
+		
+		chartPanel = new ChartPanel((JFreeChart) null);
+		chartPanel.setBounds(443, 183, 416, 293);
+		Filtr.add(chartPanel);
+		chartPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
+		chartPanel.setLayout(null);
+		
+		next = new JButton("Nast\u0119pny");
+		next.setBounds(123, 157, 99, 23);
+		Filtr.add(next);
+		
+		doIt = new JButton("Wykonaj");
+		doIt.setBounds(679, 146, 99, 23);
+		Filtr.add(doIt);
+		
+		lblOkno = new JLabel("Okno:");
+		lblOkno.setBounds(514, 87, 155, 14);
+		Filtr.add(lblOkno);
+		
+		previous = new JButton("Poprzedni");
+		previous.setBounds(10, 157, 103, 23);
+		Filtr.add(previous);
+		
+		lblUzupelnienieZerami = new JLabel("Uzupelnienie zerami?");
+		lblUzupelnienieZerami.setBounds(514, 25, 155, 14);
+		Filtr.add(lblUzupelnienieZerami);
+		
+		lblDugoFiltraL = new JLabel("D\u0142ugo\u015B filtra L");
+		lblDugoFiltraL.setBounds(49, 97, 153, 14);
+		Filtr.add(lblDugoFiltraL);
+		
+		przesuniecie = new JTextField();
+		przesuniecie.setBounds(212, 47, 101, 20);
+		Filtr.add(przesuniecie);
+		przesuniecie.setColumns(10);
+		
+		lblPrzesunicieHopsize = new JLabel("Przesuni\u0119cie R:");
+		lblPrzesunicieHopsize.setBounds(49, 47, 153, 14);
+		Filtr.add(lblPrzesunicieHopsize);
+		
+		lblDugocOkna = new JLabel("D\u0142ugo\u015Bc okna M:");
+		lblDugocOkna.setBounds(49, 22, 153, 14);
+		Filtr.add(lblDugocOkna);
+		
+		lblPrbkowanie = new JLabel("Pr\u00F3bkowanie:");
+		lblPrbkowanie.setBounds(514, 56, 155, 14);
+		Filtr.add(lblPrbkowanie);
+		
+		windowLenghtInput = new JTextField();
+		windowLenghtInput.setBounds(212, 22, 101, 20);
+		Filtr.add(windowLenghtInput);
+		windowLenghtInput.setColumns(10);
+		
+		lblFiltracja = new JLabel("Filtracja w dziedzinie:");
+		lblFiltracja.setBounds(514, 118, 155, 14);
+		Filtr.add(lblFiltracja);
+		previous.addActionListener(this);
+		doIt.addActionListener(this);
+		next.addActionListener(this);
+		
+		btnPlay = new JButton("Play");
+		btnPlay.setBounds(10, 47, 101, 35);
+		frame.getContentPane().add(btnPlay);
+		btnPlay.setEnabled(false);
+		
+		JLabel lblWczytano = new JLabel("Wczytano: ");
+		lblWczytano.setBounds(10, 15, 91, 20);
+		frame.getContentPane().add(lblWczytano);
+		
+		fileName = new JLabel("");
+		fileName.setBounds(111, 15, 140, 20);
+		frame.getContentPane().add(fileName);
+		
+		filePath = new JLabel("");
+		filePath.setBounds(261, 15, 369, 20);
+		frame.getContentPane().add(filePath);
+		btnPlay.addActionListener(this);
 		
 		
 		//-----------------------------------   KOREKCJA
@@ -254,121 +369,6 @@ public class Zadanie4 extends JPanel implements ActionListener{
 
 		//----------------------------------
 		
-		Filtr = new JPanel();
-		tabbedPane.addTab("Filtr \"impulsowy\"", null, Filtr, null);
-		Filtr.setLayout(null);
-		
-		chartPanel2 = new ChartPanel((JFreeChart) null);
-		chartPanel2.setBounds(0, 183, 421, 293);
-		Filtr.add(chartPanel2);
-		chartPanel2.setBorder(new LineBorder(new Color(0, 0, 0)));
-		
-		filtrLenghtField = new JTextField();
-		filtrLenghtField.setBounds(212, 97, 101, 20);
-		Filtr.add(filtrLenghtField);
-		filtrLenghtField.setColumns(10);
-		
-		lblCzestotliwoscOdciecia = new JLabel("Czestotliwosc odciecia ");
-		lblCzestotliwoscOdciecia.setBounds(49, 72, 153, 14);
-		Filtr.add(lblCzestotliwoscOdciecia);
-		
-		frequencyCutField = new JTextField();
-		frequencyCutField.setBounds(212, 72, 101, 20);
-		Filtr.add(frequencyCutField);
-		frequencyCutField.setColumns(10);
-		
-		chartPanel = new ChartPanel((JFreeChart) null);
-		chartPanel.setBounds(443, 183, 416, 293);
-		Filtr.add(chartPanel);
-		chartPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
-		chartPanel.setLayout(null);
-		
-		next = new JButton("Nast\u0119pny");
-		next.setBounds(99, 157, 79, 23);
-		Filtr.add(next);
-		
-		doIt = new JButton("Wykonaj");
-		doIt.setBounds(679, 146, 99, 23);
-		Filtr.add(doIt);
-		
-		lblOkno = new JLabel("Okno:");
-		lblOkno.setBounds(514, 87, 155, 14);
-		Filtr.add(lblOkno);
-		
-		previous = new JButton("Poprzedni");
-		previous.setBounds(10, 157, 79, 23);
-		Filtr.add(previous);
-		
-		lblUzupelnienieZerami = new JLabel("Uzupelnienie zerami?");
-		lblUzupelnienieZerami.setBounds(514, 25, 155, 14);
-		Filtr.add(lblUzupelnienieZerami);
-		
-		lblDugoFiltraL = new JLabel("D\u0142ugo\u015B filtra L");
-		lblDugoFiltraL.setBounds(49, 97, 153, 14);
-		Filtr.add(lblDugoFiltraL);
-		
-		przesuniecie = new JTextField();
-		przesuniecie.setBounds(212, 47, 101, 20);
-		Filtr.add(przesuniecie);
-		przesuniecie.setColumns(10);
-		
-		lblPrzesunicieHopsize = new JLabel("Przesuni\u0119cie R:");
-		lblPrzesunicieHopsize.setBounds(49, 47, 153, 14);
-		Filtr.add(lblPrzesunicieHopsize);
-		
-		zeroPlug = new JComboBox<String>();
-		zeroPlug.setBounds(679, 22, 99, 20);
-		Filtr.add(zeroPlug);
-		
-		lblDugocOkna = new JLabel("D\u0142ugo\u015Bc okna M:");
-		lblDugocOkna.setBounds(49, 22, 153, 14);
-		Filtr.add(lblDugocOkna);
-		
-		windowBox = new JComboBox<String>();
-		windowBox.setBounds(679, 84, 99, 20);
-		Filtr.add(windowBox);
-		
-		lblPrbkowanie = new JLabel("Pr\u00F3bkowanie:");
-		lblPrbkowanie.setBounds(514, 56, 155, 14);
-		Filtr.add(lblPrbkowanie);
-		
-		framesBox = new JComboBox<Double>();
-		framesBox.setBounds(679, 53, 99, 20);
-		Filtr.add(framesBox);
-		
-		filtrBox = new JComboBox<String>();
-		filtrBox.setBounds(679, 115, 99, 20);
-		Filtr.add(filtrBox);
-		
-		windowLenghtInput = new JTextField();
-		windowLenghtInput.setBounds(212, 22, 101, 20);
-		Filtr.add(windowLenghtInput);
-		windowLenghtInput.setColumns(10);
-		
-		lblFiltracja = new JLabel("Filtracja:");
-		lblFiltracja.setBounds(514, 118, 155, 14);
-		Filtr.add(lblFiltracja);
-		previous.addActionListener(this);
-		doIt.addActionListener(this);
-		next.addActionListener(this);
-		
-		btnPlay = new JButton("Play");
-		btnPlay.setBounds(10, 47, 101, 35);
-		frame.getContentPane().add(btnPlay);
-		btnPlay.setEnabled(false);
-		
-		JLabel lblWczytano = new JLabel("Wczytano: ");
-		lblWczytano.setBounds(10, 15, 91, 20);
-		frame.getContentPane().add(lblWczytano);
-		
-		fileName = new JLabel("");
-		fileName.setBounds(111, 15, 140, 20);
-		frame.getContentPane().add(fileName);
-		
-		filePath = new JLabel("");
-		filePath.setBounds(261, 15, 369, 20);
-		frame.getContentPane().add(filePath);
-		btnPlay.addActionListener(this);
 		
 //		tabbedPane.addTab("Filtr", component);
 	}
@@ -522,6 +522,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	private JTextField variable2;
 	private JLabel lblZmienna_1;
 	private JTextField variable3;
+
 }
 
 
