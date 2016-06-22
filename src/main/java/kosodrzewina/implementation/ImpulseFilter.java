@@ -40,24 +40,52 @@ public class ImpulseFilter {
 	public void timeFilter(){
 		for (int i = 0; i < sound.getFrames()[0].length; i += R) {
 			List<Double> operationList = new ArrayList<Double>();
-			List<Double> tempList = new ArrayList<Double>();
-			FillListWithZerosAtEnd(i, operationList);				//wype³nienie zerami na koñcu
-			
-			
+			List<Double> tempList;
+//			FillListWithZerosAtEnd(i, operationList);				//wype³nienie zerami na koñcu
+			for(int j = i; j < M; j++){
+				operationList.add(sound.getFrames()[0][j]);
+			}
+			tempList = splot(operationList);
 			copyList(operationList, tempList);						//skopiowanie listy
-			
-			
-			
+			for(int j = i, k = 0; k < tempList.size(); j++, k++){
+				soundList.set(j, soundList.get(j)+tempList.get(k));
+			}
 			
 		}
 	}
 	
 	
+	private List<Double> splot(List<Double> probe){
+		List<Double> params = new ArrayList<Double>();	//lista parametrów powiêkszona o x 0 na koñcu i pocz¹tku
+		for (int i = 0; i < probe.size()-1; i++) {
+			params.add(0.00);
+		}
+		for(int i = 0; i < parameters.size();i++){
+			params.add(parameters.get(i));
+		}
+		for (int i = 0; i < probe.size()-1; i++) {
+			params.add(0.00);
+		}
+		
+		List<Double> splotList = new ArrayList<Double>();
+		for (int i = 0; i < params.size()-(probe.size()); i++) {
+			double value = 0;
+			for(int j = probe.size()-1, k = 0; j >= 0; j--, k++){
+				value += params.get(k) * probe.get(j);
+			}
+			if(value != 0){
+				splotList.add(value);
+			}
+		}
+		return splotList;
+	}
+	
 	
 	//wyznaczenie wspó³czynników W podstawce by³o L ale od pêczka M
+	//ale od tego jest L
 	public void designateParametersH(){
-		for (int i = 0; i < M-1; i++) {
-			if(i == (M-1)/2)
+		for (int i = 0; i < L; i++) {
+			if(i == (L)/2)
 				parameters.add(2*fo/fp);
 			else{
 				double counter = Math.sin( ((2*Math.PI*fo)/fp)*(i-(M-1)/2) );
@@ -123,14 +151,22 @@ public class ImpulseFilter {
 	}
 	
 	private void copySound(Sound s){
-		for (int i = 0; i < s.getFrames()[0].length; i++) {
-			soundList.add(s.getFrames()[0][i]);
-		}
+		
+		//kopiowanie tablicy do listy
+//		for (int i = 0; i < s.getFrames()[0].length; i++) {
+//			soundList.add(s.getFrames()[0][i]);
+//		}
 
-		for (int i = 0; i < sound.getFrames()[0].length-M; i += R) {
-			for(int j = 0; j < M; j++){
-				soundList.set(j+i, 0.00);
-			}	
+		//to jest ¿eby zostawi sam koniec dŸwiêku
+//		for (int i = 0; i < sound.getFrames()[0].length-M; i += R) {
+//			for(int j = 0; j < M; j++){
+//				soundList.set(j+i, 0.00);
+//			}	
+//		}
+		
+		for (int i = 0; i < sound.getFrames()[0].length; i++) {
+//				soundList.set(i, 0.00);	
+			soundList.add(0.00);
 		}
 	}
 
