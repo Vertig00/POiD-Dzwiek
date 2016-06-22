@@ -44,6 +44,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import kosodrzewina.implementation.FileLoader;
+import kosodrzewina.implementation.ImpulseFilter;
 import kosodrzewina.implementation.Task4Implementation;
 import kosodrzewina.model.Sound;
 import javax.swing.JTabbedPane;
@@ -87,7 +88,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
     private JLabel lblFiltracja;
     private JComboBox<String> filtrBox;
     private JLabel lblDugocOkna;
-    private JTextField windowLenghtInput;
+    private JTextField M;
     private JLabel lblPrzesunicieHopsize;
     private JTextField przesuniecie;
     private JLabel lblUzupelnienieZerami;
@@ -257,10 +258,10 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		lblPrbkowanie.setBounds(514, 56, 155, 14);
 		Filtr.add(lblPrbkowanie);
 		
-		windowLenghtInput = new JTextField();
-		windowLenghtInput.setBounds(212, 22, 101, 20);
-		Filtr.add(windowLenghtInput);
-		windowLenghtInput.setColumns(10);
+		M = new JTextField();
+		M.setBounds(212, 22, 101, 20);
+		Filtr.add(M);
+		M.setColumns(10);
 		
 		lblFiltracja = new JLabel("Filtracja w dziedzinie:");
 		lblFiltracja.setBounds(514, 118, 155, 14);
@@ -404,14 +405,14 @@ public class Zadanie4 extends JPanel implements ActionListener{
 			clip.start();
 		}else if(z == doIt){
 
-//			int window = windowBox.getSelectedIndex();	//1 -von, 2 -hamm, 0 - kwadr
-//			int zeroFeed = zeroPlug.getSelectedIndex();	//wype³nianie zerami
-//			double M = Double.parseDouble(windowLenghtInput.getText());
-//			double R = Double.parseDouble(przesuniecie.getText());
-//			double L = Double.parseDouble(filtrLenghtField.getText());
-//			double frequencyCut = Double.parseDouble(frequencyCutField.getText());
+			int window = windowBox.getSelectedIndex();	//1 -von, 2 -hamm, 0 - kwadr
+			int zeroFeed = zeroPlug.getSelectedIndex();	//wype³nianie zerami
+			int M = Integer.parseInt(this.M.getText());
+			int R = Integer.parseInt(przesuniecie.getText());
+			int L = Integer.parseInt(filtrLenghtField.getText());
+			double frequencyCut = Double.parseDouble(frequencyCutField.getText());
 //
-//			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
+			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
 
 			chartData = Task4Implementation.run(sound, 2048, 1024);
 			placeAllCharts();
