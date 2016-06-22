@@ -529,8 +529,8 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	}
 	private void refreshChart(ChartPanel chartPanel, int[] args) {
 		placeChart(chartPanel, args);
-		frame.getContentPane().remove(chartPanel);
-		frame.getContentPane().add(chartPanel);
+		Filtr.remove(chartPanel);
+		Filtr.add(chartPanel);
 	}
 	private void placeChart(ChartPanel chartPanel, int[] args) {
 		chartPanel.setChart( chartShortNP(chartNumber, sound.getSampleRate(), 2, args ) );
