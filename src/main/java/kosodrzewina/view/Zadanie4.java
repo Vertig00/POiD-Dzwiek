@@ -428,12 +428,11 @@ public class Zadanie4 extends JPanel implements ActionListener{
 				filter.setNewSound(sound2);
 				FileSaver.saveWav(sound2);
 			}else if(filtrBox.getSelectedIndex() == 1){
-				//TODO: dziedzina czêstotliwoœci -twoje ET!!!
+				chartData = Task4Implementation.run(sound, M, R, L, (int)frequencyCut, window, zeroFeed);
+				sound2 = Task4Implementation.globalSound;
+				FileSaver.saveWav(sound2);
+				placeAllCharts();
 			}
-//
-
-			chartData = Task4Implementation.run(sound, 2048, 1024);
-			placeAllCharts();
 
 		}else outerloop: if(z == previous){
 			if(chartNumber <= 0)

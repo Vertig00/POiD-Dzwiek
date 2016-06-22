@@ -35,6 +35,12 @@ public class Task4Implementation {
 
 		// [1] Divide original sound ( windows )
 		List<double[]> soundParts = divideSoundWindows(originalSound, M, R);
+		System.out.println("INFO: sound length:" + originalSound.getFrames()[0].length);
+		System.out.println("INFO: part size:" + M);
+		System.out.println("INFO: parts distance:" + R);
+		System.out.println("INFO: parts quantity:" + soundParts.size());
+		System.out.println("");
+		
 		// [1] Window functions
 		int N = M + L - 1;
 		calcWindows(soundParts, N, window, zeros);
@@ -83,7 +89,7 @@ public class Task4Implementation {
 			resultParts.add(part);
 			
 			// FFT filter Magnitude
-			fftCalcMag.add(mult);
+			fftCalcMag.add(filterMagnitude);
 			
 			
 			
@@ -127,10 +133,15 @@ public class Task4Implementation {
 		
 		for(int i = 0; i < resultParts.size(); i++) {
 			for(int j = 0; j < resultParts.get(i).length; j++) {
-				result[i*distance + j] += resultParts.get(i)[j];
+				if(i*distance + j < result.length)
+					result[i*distance + j] += resultParts.get(i)[j];
 			}
 		}
-			
+		System.out.println("TOSOUND: Last element id: " + 
+		( (resultParts.size()-1)*distance + 
+				resultParts.get(resultParts.size()-1).length-1) );
+		System.out.println("");
+		sound.getFrames()[0] = result;
 		
 	}
 	private static double[] calcFFT(double[] frames) {
@@ -210,7 +221,7 @@ public class Task4Implementation {
 		
 		for(int i = 0; i < parts.size(); i++)
 			if(window == 0)
-				parts.set(i, rectangleWindow(parts.get(i), window, zeros) );
+				parts.set(i, rectangleWindow(parts.get(i), N, zeros) );
 		
 	}
 	private static double[] rectangleWindow(double[] table, int N, int zeros) {
