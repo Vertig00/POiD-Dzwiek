@@ -20,6 +20,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -44,6 +46,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import kosodrzewina.implementation.FileLoader;
+import kosodrzewina.implementation.FileSaver;
 import kosodrzewina.implementation.ImpulseFilter;
 import kosodrzewina.implementation.Task4Implementation;
 import kosodrzewina.model.Sound;
@@ -68,7 +71,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	JLabel fileName;
 	JLabel filePath;
 	InputStream in;
-	Sound sound;
+	Sound sound, sound2;
 	JFreeChart loadImageChart;
 	JComboBox<String> windowBox;
 	
@@ -81,7 +84,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
     AudioInputStream stream;
     AudioFormat format;
     DataLine.Info info;
-    Clip clip;
+    Clip clip, clip2;
     private JLabel lblOkno;
     private JLabel lblPrbkowanie;
     private JComboBox<Double> framesBox;
@@ -168,6 +171,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		Filtr.add(windowBox);
 		
 		framesBox = new JComboBox<Double>();
+		framesBox.setEnabled(false);
 		framesBox.setBounds(679, 53, 99, 20);
 		Filtr.add(framesBox);
 		
@@ -196,6 +200,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		chartPanel2.setBounds(0, 183, 421, 293);
 		Filtr.add(chartPanel2);
 		chartPanel2.setBorder(new LineBorder(new Color(0, 0, 0)));
+		chartPanel2.setLayout(null);
 		
 		filtrLenghtField = new JTextField();
 		filtrLenghtField.setBounds(212, 97, 101, 20);
@@ -366,6 +371,11 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		variable3.setColumns(10);
 		variable3.setBounds(170, 96, 86, 20);
 		WahWah.add(variable3);
+		
+		btnNewButton = new JButton("Play edit sound");
+		btnNewButton.addActionListener(this);
+		btnNewButton.setBounds(711, 47, 147, 35);
+		frame.getContentPane().add(btnNewButton);
 
 
 		//----------------------------------
@@ -404,15 +414,23 @@ public class Zadanie4 extends JPanel implements ActionListener{
 			clip.setMicrosecondPosition(0);
 			clip.start();
 		}else if(z == doIt){
-
 			int window = windowBox.getSelectedIndex();	//1 -von, 2 -hamm, 0 - kwadr
 			int zeroFeed = zeroPlug.getSelectedIndex();	//wype³nianie zerami
 			int M = Integer.parseInt(this.M.getText());
 			int R = Integer.parseInt(przesuniecie.getText());
 			int L = Integer.parseInt(filtrLenghtField.getText());
 			double frequencyCut = Double.parseDouble(frequencyCutField.getText());
+			
+			if(filtrBox.getSelectedIndex() == 0){
+				ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
+				filter.timeFilter();
+				sound2 = new Sound(sound);
+				filter.setNewSound(sound2);
+				FileSaver.saveWav(sound2);
+			}else if(filtrBox.getSelectedIndex() == 1){
+				//TODO: dziedzina czêstotliwoœci -twoje ET!!!
+			}
 //
-			ImpulseFilter filter = new ImpulseFilter(sound, M, L, R, frequencyCut, zeroFeed, window);
 
 			chartData = Task4Implementation.run(sound, 2048, 1024);
 			placeAllCharts();
@@ -428,6 +446,29 @@ public class Zadanie4 extends JPanel implements ActionListener{
 				break outerloop2;
 			chartNumber++;
 			refreshAllCharts();
+		}else if(z == btnNewButton){
+			File file = new File("sounds/EditSound.wav");
+			
+			try {
+                stream = AudioSystem.getAudioInputStream(file);
+                format = stream.getFormat();
+                info = new DataLine.Info(Clip.class, format);
+                clip2 = (Clip) AudioSystem.getLine(info);
+                clip2.open(stream);
+            } catch (UnsupportedAudioFileException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            } catch (LineUnavailableException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+            		    
+	          clip2.stop();
+	          clip2.setMicrosecondPosition(0);
+	          clip2.start();
 		}
 	}
 	
@@ -523,6 +564,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	private JTextField variable2;
 	private JLabel lblZmienna_1;
 	private JTextField variable3;
+	private JButton btnNewButton;
 
 }
 

@@ -26,10 +26,9 @@ public class ImpulseFilter {
 		this.fo = frequencyCut;
 		this.zeroFill = zeroFill;
 		this.window = window;
-		copySound(sound);
-		designateParametersH();
-		WindowMultiplyParameters();
-		
+		copySound(sound);		
+		designateParametersH();			//obliczenie wspó³czynników 
+		WindowMultiplyParameters();		//przemno¿enie wspó³czynników przez okno
 	}
 	
 	
@@ -38,19 +37,18 @@ public class ImpulseFilter {
 	
 	
 	public void timeFilter(){
-		for (int i = 0; i < sound.getFrames()[0].length; i += R) {
-			List<Double> operationList = new ArrayList<Double>();
-			List<Double> tempList;
+		for (int i = 0; i < sound.getFrames()[0].length - M; i += R) {
+			List<Double> soundWindowList = new ArrayList<Double>();
+			List<Double> splotList;
 //			FillListWithZerosAtEnd(i, operationList);				//wype³nienie zerami na koñcu
-			for(int j = i; j < M; j++){
-				operationList.add(sound.getFrames()[0][j]);
+			for(int k=0; k < M; k++){
+				soundWindowList.add(sound.getFrames()[0][k+i]);
 			}
-			tempList = splot(operationList);
-			copyList(operationList, tempList);						//skopiowanie listy
-			for(int j = i, k = 0; k < tempList.size(); j++, k++){
-				soundList.set(j, soundList.get(j)+tempList.get(k));
+			splotList = splot(soundWindowList);
+//			copyList(operationList, tempList);						//skopiowanie listy
+			for(int j = i, k = 0; k < splotList.size()-M; j++, k++){
+				soundList.set(j, soundList.get(j)+splotList.get(k));
 			}
-			
 		}
 	}
 	
@@ -68,9 +66,9 @@ public class ImpulseFilter {
 		}
 		
 		List<Double> splotList = new ArrayList<Double>();
-		for (int i = 0; i < params.size()-(probe.size()); i++) {
+		for (int i = 0; i <= params.size()-(probe.size()); i++) {	//uwaga na koniec splotu
 			double value = 0;
-			for(int j = probe.size()-1, k = 0; j >= 0; j--, k++){
+			for(int j = probe.size()-1, k = i; j >= 0; j--, k++){
 				value += params.get(k) * probe.get(j);
 			}
 			if(value != 0){
@@ -82,14 +80,14 @@ public class ImpulseFilter {
 	
 	
 	//wyznaczenie wspó³czynników W podstawce by³o L ale od pêczka M
-	//ale od tego jest L
+	//wspó³czynniki o d³ugoœci filtru L
 	public void designateParametersH(){
 		for (int i = 0; i < L; i++) {
-			if(i == (L)/2)
+			if(i == (L)/2)			//musi byc albo L albo L-1 zale¿nie od tego jak jest z tym forem 
 				parameters.add(2*fo/fp);
 			else{
-				double counter = Math.sin( ((2*Math.PI*fo)/fp)*(i-(M-1)/2) );
-				double denominator = Math.PI*(i-(L-1)/2);
+				double counter = Math.sin( ((2*Math.PI*fo)/fp)*(i-(L)/2) );
+				double denominator = Math.PI*(i-(L)/2);
 				double result = counter/denominator;
 				parameters.add(result);
 			}
@@ -126,6 +124,12 @@ public class ImpulseFilter {
 	private void WindowMultiplyParameters(){
 		for (int i = 0; i < parameters.size(); i++) {
 			parameters.set(i, parameters.get(i)*getSelectedWindow(i));
+		}
+	}
+	
+	public void setNewSound(Sound s){
+		for (int i = 0; i < s.getFrames()[0].length; i++) {
+			s.getFrames()[0][i] = soundList.get(i);
 		}
 	}
 	
