@@ -540,12 +540,12 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	}
 	private void refreshAllCharts() {
 		placeAllCharts();
-		refreshChart( chartPanel, new int[]{0,1} );
-		refreshChart( chartPanel2, new int[]{2,3} );
+		refreshChart( chartPanel, new int[]{0} );
+		refreshChart( chartPanel2, new int[]{1} );
 	}
 	private void placeAllCharts() {
-		placeChart( chartPanel, new int[]{0,1} );
-		placeChart( chartPanel2, new int[]{2,3} );
+		placeChart( chartPanel, new int[]{0} );
+		placeChart( chartPanel2, new int[]{1} );
 	}
 	
 	private double checkBounds(double n){

@@ -89,7 +89,7 @@ public class Task4Implementation {
 			resultParts.add(part);
 			
 			// FFT filter Magnitude
-			fftCalcMag.add(filterMagnitude);
+			fftCalcMag.add(mult);
 			
 			
 			
@@ -102,8 +102,8 @@ public class Task4Implementation {
 		// Chart Data
 		resultData.add( listToDouble2d(fftMag) );
 		resultData.add( listToDouble2d(fftCalcMag) );
-		resultData.add( listToDouble2d(fftPha) );
-		resultData.add( listToDouble2d(fftCalcPha) );
+//		resultData.add( listToDouble2d(fftPha) );
+//		resultData.add( listToDouble2d(fftCalcPha) );
 		
 		return resultData;
 	}
@@ -227,17 +227,18 @@ public class Task4Implementation {
 	private static double[] rectangleWindow(double[] table, int N, int zeros) {
 		double[] result = new double[N];
 		int M = table.length;
+		int iter = 0;
 		
 		if(zeros == 0)
 			for(int i = 0; i < N; i++)
 				if( i < M)
-					result[i] = table[i];
+					result[i] = table[iter++];
 				else
 					result[i] = 0;
 		else if(zeros == 1)
 			for(int i = 0; i < N; i++)
 				if( i < M/2 || i > N-(M/2) )
-					result[i] = table[i];
+					result[i] = table[iter++];
 				else
 					result[i] = 0;
 		
