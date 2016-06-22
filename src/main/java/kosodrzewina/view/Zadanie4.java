@@ -78,7 +78,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 	byte[] soundTab = null;
 	String[] optionTab = {"prostok¹tna","von Hanna","Hamminga"};
 	String[] filtrTab = {"czas","czêstotliwoœc"};
-	String[] zeroPlugTab = {"?","?"};
+	String[] zeroPlugTab = {"Przyczynowy","Nieprzyczynowy"};
 	Double[] samplingTab = {(double) 512,(double) 1024,(double) 2048,(double) 4096,(double) 8192};
 	
     AudioInputStream stream;
@@ -203,6 +203,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		chartPanel2.setLayout(null);
 		
 		filtrLenghtField = new JTextField();
+		filtrLenghtField.setText("1024");
 		filtrLenghtField.setBounds(212, 97, 101, 20);
 		Filtr.add(filtrLenghtField);
 		filtrLenghtField.setColumns(10);
@@ -214,6 +215,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		frequencyCutField = new JTextField();
 		frequencyCutField.setBounds(212, 72, 101, 20);
 		Filtr.add(frequencyCutField);
+		frequencyCutField.setText("500");
 		frequencyCutField.setColumns(10);
 		
 		chartPanel = new ChartPanel((JFreeChart) null);
@@ -247,6 +249,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		Filtr.add(lblDugoFiltraL);
 		
 		przesuniecie = new JTextField();
+		przesuniecie.setText("1024");
 		przesuniecie.setBounds(212, 47, 101, 20);
 		Filtr.add(przesuniecie);
 		przesuniecie.setColumns(10);
@@ -267,6 +270,7 @@ public class Zadanie4 extends JPanel implements ActionListener{
 		M.setBounds(212, 22, 101, 20);
 		Filtr.add(M);
 		M.setColumns(10);
+		M.setText("2048");
 		
 		lblFiltracja = new JLabel("Filtracja w dziedzinie:");
 		lblFiltracja.setBounds(514, 118, 155, 14);
