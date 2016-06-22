@@ -5,93 +5,110 @@ import java.util.List;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 import kosodrzewina.model.Sound;
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 
 public class Task4Implementation {
-
+	
+	public static Sound globalSound;
+	
 	/**
 	 * RUN
-	 */
-	public static List<double[][]> run(Sound originalSound, int M, int R) {
+	 */	
+	public static List<double[][]> run(Sound originalSound, int M, int R, int L, int fc,
+			int window, int zeros) {
+		// Sound parts
+		List<double[]> resultParts = new ArrayList<double[]>();
+		
 		List<double[][]> resultData = new ArrayList<double[][]>();
+		
+		// Chart Data
 		List<double[]> fftMag = new ArrayList<double[]>();
-		List<double[]> fftEMag = new ArrayList<double[]>();
 		List<double[]> fftPha = new ArrayList<double[]>();
-		List<double[]> fftEPha = new ArrayList<double[]>();
+		List<double[]> fftCalcMag = new ArrayList<double[]>();
+		List<double[]> fftCalcPha = new ArrayList<double[]>();
 
-		// #1. Clone original sound
+		// Clone original sound
 		Sound modifiedSound = new Sound(originalSound);
 		modifiedSound.setNumChannels(1);
 
-		// #2. Divide original sound **Windows (R)
+		// [1] Divide original sound ( windows )
 		List<double[]> soundParts = divideSoundWindows(originalSound, M, R);
+		// [1] Window functions
+		int N = M + L - 1;
+		calcWindows(soundParts, N, window, zeros);
 
-		double[] fft, fftE, spectrum;
+		// [2] Calc filter
+		int fs = 44100;
+		double[] filter = calcFilter(fc, fs, L);
+		
+		// [3] Window with filter
+		List<double[]> filterL = new ArrayList<double[]>();
+		filterL.add(filter);
+		calcWindows(filterL, N, window, zeros);
+		filter = filterL.get(0);
+		
+		// [4] Filter fft
+		double[] filterFFT = calcFFT(filter);
+		// [4] Filter magnitude
+		double[] filterMagnitude = calcSpectrumMagnitude(filterFFT);
+		
+		System.out.println("N: " + N);
+		System.out.println("part size: " + soundParts.get(0).length);
+		System.out.println("filter size: " + filter.length);
+		
+		double[] fft, spectrum, mult, windowMag, windowPha;
 		for (int i = 0; i < soundParts.size(); i++) {
 
-			// 3#. Calculate fft
-			fft = calcFFT(soundParts.get(i), originalSound.getSampleRate());
-
-			// 4#. DFT * e^...
-			fftE = multipyDFTwithE(fft, i, R);
+			// [4] Window fft
+			fft = calcFFT(soundParts.get(i));
 			
-			// 5#. Results
-			
-			// FFT Magnitude
-			spectrum = calcSpectrumMagnitude(fft);
-			fftMag.add(spectrum);
-			// FFTe Magnitude
-			spectrum = calcSpectrumMagnitude(fftE);
-			fftEMag.add(spectrum);
-			// FFT Magnitude
-			spectrum = calcSpectrumPhase(fft);
-			fftPha.add(spectrum);
-			// FFTe Magnitude
-			spectrum = calcSpectrumPhase(fftE);
-			fftEPha.add(spectrum);
+			// [4] Window Magnitude
+			windowMag = calcSpectrumMagnitude(fft);
+			fftMag.add(windowMag);
+			// Window Phase
+			windowPha = calcSpectrumPhase(fft);
+			fftPha.add(windowPha);
+			fftCalcPha.add(windowPha);
 
+			
+			// [4] mult Window and Filter
+			mult = tableMult(windowMag, filterMagnitude);
+			
+			// [5] back to complex
+			double[] reverseFFT = backToComplex(mult, windowPha);
+			// [5] reverse FFT
+			double[] part = reverseFFT(reverseFFT);
+			resultParts.add(part);
+			
+			// FFT filter Magnitude
+			fftCalcMag.add(mult);
+			
+			
+			
 		}
 		
+		// Generate modified Sound
+		partsToSound(modifiedSound, resultParts, R);
+		globalSound = modifiedSound;
+		
+		// Chart Data
 		resultData.add( listToDouble2d(fftMag) );
-		resultData.add( listToDouble2d(fftEMag) );
+		resultData.add( listToDouble2d(fftCalcMag) );
 		resultData.add( listToDouble2d(fftPha) );
-		resultData.add( listToDouble2d(fftEPha) );
+		resultData.add( listToDouble2d(fftCalcPha) );
+		
 		return resultData;
 	}
+	
 	/**
-	 * Privs
+	 * PRIVS
 	 */
-	private static List<double[]> divideSound(Sound sound, int partLength) {
-		int soundLength = sound.getNumFrames();
-		int partsCount = soundLength/partLength;
-		List<double[]> soundParts = new ArrayList<double[]>();
-
-		// full length parts
-		double[] part;
-		for(int i = 0; i < partsCount; i++) {		
-			part = new double[partLength];
-			for(int j = 0; j < partLength; j++) {
-				part[j] = sound.getFrames()[0][partLength*i + j];
-			}
-			soundParts.add( part );
-		}
-		// last part (not full sized)
-		int lastLength = soundLength%partLength;
-		if(lastLength > 0) {
-			part = new double[ lastLength ];
-			for(int j = 0; j < lastLength; j++) {
-				part[j] = sound.getFrames()[0][partLength*partsCount + j];
-			}
-			soundParts.add( part );
-		}
-		
-		return soundParts;
-	}
 	private static List<double[]> divideSoundWindows(Sound sound, int partLength, int distance) {
 		int soundLength = sound.getNumFrames();
 		int partsCount = (soundLength-partLength)/distance;
 		List<double[]> soundParts = new ArrayList<double[]>();
-		
-		System.out.println();
 
 		// full length parts
 		double[] part;
@@ -105,7 +122,18 @@ public class Task4Implementation {
 		
 		return soundParts;
 	}
-	private static double[] calcFFT(double[] frames, long soundSampleRate) {
+	private static void partsToSound(Sound sound, List<double[]> resultParts, int distance) {
+		double[] result = new double[ sound.getFrames()[0].length ];
+		
+		for(int i = 0; i < resultParts.size(); i++) {
+			for(int j = 0; j < resultParts.get(i).length; j++) {
+				result[i*distance + j] += resultParts.get(i)[j];
+			}
+		}
+			
+		
+	}
+	private static double[] calcFFT(double[] frames) {
 		// place frames to real part
 		double fftFrames[] = new double[frames.length * 2];	
 		for(int i = 0; i < frames.length; i++)
@@ -117,15 +145,18 @@ public class Task4Implementation {
 		
 		return fftFrames;
 	}
-	private static double[] calcSpectrumPhase(double[] fft) {
-		int size = fft.length/2;
-		double[] phase = new double[size];
+	private static double[] reverseFFT(double[] frames) {
+		int size = frames.length/2;
+		double[] result = new double[size];
 		
-		for(int i = 0; i < size; i++) {
-			phase[i] = Math.atan2( fft[2*i+1], fft[2*i]	);
-		}
+		DoubleFFT_1D fft = new DoubleFFT_1D(size);
+		fft.complexInverse(frames, true);
 		
-		return phase;
+		for(int i = 0; i < size; i++)
+			result[i] = frames[2*i];
+		
+		return result;
+			
 	}
 	private static double[] calcSpectrumMagnitude(double[] fft) {
 		int size = fft.length/2;
@@ -136,21 +167,15 @@ public class Task4Implementation {
 
 		return magnitude;
 	}
-	private static double[] multipyDFTwithE(double[] dft, int m, int R) {
-		int N = dft.length/2;
-		double[] dftE = new double[N*2];
+	private static double[] calcSpectrumPhase(double[] fft) {
+		int size = fft.length/2;
+		double[] phase = new double[size];
 		
-		double lambda;
-		for(int k = 0; k < N; k++) {
-			lambda = 2*Math.PI * k*m*R/N;
-			dftE[k*2] = Math.cos( lambda );
-			dftE[k*2+1] = Math.sin( lambda );
-			
-			dftE[k*2] = dftE[k*2] * dft[k*2];
-			dftE[k*2+1] = dftE[k*2+1] * dft[k*2+1];
+		for(int i = 0; i < size; i++) {
+			phase[i] = Math.atan2( fft[2*i+1], fft[2*i]	);
 		}
 		
-		return dftE;
+		return phase;
 	}
 	private static double[][] listToDouble2d(List<double[]> list) {
 		double[][] array = new double[list.size()][];
@@ -160,34 +185,81 @@ public class Task4Implementation {
 		
 		return array;
 	}
-	/**
-	 * Tests
-	 */
-	public static List<double[]> testPhaseFFT(Sound originalSound, int partLength) {
-		List<double[]> resultData = new ArrayList<double[]>();
+	private static double[] tableMult(double[] tab1, double[] tab2) {
+		double[] result = new double[tab1.length];
 		
-		// #1. Clone original sound
-		Sound modifiedSound = new Sound(originalSound);
-		modifiedSound.setNumChannels(1);
+		for(int i = 0; i < tab2.length; i++) 
+			result[i] = tab1[i]*tab2[i];
 		
-		// #2. Divide original sound 	**TODO: windows
-		List<double[]> soundParts = divideSound(originalSound, partLength);
+		return result;
+	}
+	private static double[] backToComplex(double[] mag, double[] pha) {
+		double[] result = new double[mag.length*2];
 		
-		double[] fft, spectrum;
-		for(int i = 0; i < soundParts.size(); i++) {
-			
-			// 3#. Calculate fft
-			fft = calcFFT( soundParts.get(i), originalSound.getSampleRate() );
-			
-			// 4#. Calculate spectrum
-			spectrum = calcSpectrumMagnitude(fft);
-			resultData.add(spectrum);
-
+		for(int i = 0; i < pha.length; i++) {
+			result[2*i] = mag[i] * cos(pha[i]);
+			result[2*i+1] = mag[i] * sin(pha[i]);
 		}
 		
-		
-		return resultData;	
+		return result;
 	}
-	
-	
+	/**
+	 * Windows
+	 */
+	private static void calcWindows(List<double[]> parts, int N, int window, int zeros) {
+		
+		for(int i = 0; i < parts.size(); i++)
+			if(window == 0)
+				parts.set(i, rectangleWindow(parts.get(i), window, zeros) );
+		
+	}
+	private static double[] rectangleWindow(double[] table, int N, int zeros) {
+		double[] result = new double[N];
+		int M = table.length;
+		
+		if(zeros == 0)
+			for(int i = 0; i < N; i++)
+				if( i < M)
+					result[i] = table[i];
+				else
+					result[i] = 0;
+		else if(zeros == 1)
+			for(int i = 0; i < N; i++)
+				if( i < M/2 || i > N-(M/2) )
+					result[i] = table[i];
+				else
+					result[i] = 0;
+		
+		
+		return result;
+	}
+	/**
+	 * filter
+	 */
+	private static double[] calcFilter(int fc, int fs, int L) {
+		double[] result = new double[L];
+		
+		for(int i = 0; i < L; i++)
+			if(i == L/2)
+				result[i] = (2*fc)/fs;
+			else {
+				double nominator = Math.sin( ( (2*PI*fc)/fs )*( i-(L/2) ) );
+				double denominator = PI * ( i-(L/2) );
+				result[i] = nominator/denominator;
+			}
+
+		return result;
+	}
+
 }
+
+
+
+
+
+
+
+
+
+
+
