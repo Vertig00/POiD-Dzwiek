@@ -219,9 +219,15 @@ public class Task4Implementation {
 	 */
 	private static void calcWindows(List<double[]> parts, int N, int window, int zeros) {
 		
-		for(int i = 0; i < parts.size(); i++)
+		for(int i = 0; i < parts.size(); i++) {
 			if(window == 0)
 				parts.set(i, rectangleWindow(parts.get(i), N, zeros) );
+			else if(window == 1)
+				parts.set(i, hannWindow(parts.get(i), N, zeros) );
+			else if(window == 2)
+				parts.set(i, hammingWindow(parts.get(i), N, zeros) );
+			
+		}
 		
 	}
 	private static double[] rectangleWindow(double[] table, int N, int zeros) {
@@ -239,6 +245,48 @@ public class Task4Implementation {
 			for(int i = 0; i < N; i++)
 				if( i < M/2 || i > N-(M/2) )
 					result[i] = table[iter++];
+				else
+					result[i] = 0;
+		
+		
+		return result;
+	}
+	private static double[] hannWindow(double[] table, int N, int zeros) {
+		double[] result = new double[N];
+		int M = table.length;
+		int iter = 0;
+		
+		if(zeros == 0)
+			for(int i = 0; i < N; i++)
+				if( i < M)
+					result[i] = table[iter++] * (0.5 - 0.5 * cos( (2*PI*i)/(M-1) ));
+				else
+					result[i] = 0;
+		else if(zeros == 1)
+			for(int i = 0; i < N; i++)
+				if( i < M/2 || i > N-(M/2) )
+					result[i] = table[iter++] * (0.5 - 0.5 * cos( (2*PI*i)/(M-1) ));
+				else
+					result[i] = 0;
+		
+		
+		return result;
+	}
+	private static double[] hammingWindow(double[] table, int N, int zeros) {
+		double[] result = new double[N];
+		int M = table.length;
+		int iter = 0;
+		
+		if(zeros == 0)
+			for(int i = 0; i < N; i++)
+				if( i < M)
+					result[i] = table[iter++] * ( 0.54 - 0.46*cos( (2*PI*i)/(M-1) ) );
+				else
+					result[i] = 0;
+		else if(zeros == 1)
+			for(int i = 0; i < N; i++)
+				if( i < M/2 || i > N-(M/2) )
+					result[i] = table[iter++] * ( 0.54 - 0.46*cos( (2*PI*i)/(M-1) ) );
 				else
 					result[i] = 0;
 		
