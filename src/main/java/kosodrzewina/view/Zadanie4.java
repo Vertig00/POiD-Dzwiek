@@ -432,7 +432,8 @@ public class Zadanie4 extends JPanel implements ActionListener{
 				filter.setNewSound(sound2);
 				FileSaver.saveWav(sound2);
 			}else if(filtrBox.getSelectedIndex() == 1){
-				chartData = Task4Implementation.run(sound, M, R, L, (int)frequencyCut, window, zeroFeed);
+				chartData = Task4Implementation.run(sound, M, R, L, 
+						(int)frequencyCut, window, zeroFeed, 0);
 				sound2 = Task4Implementation.globalSound;
 				FileSaver.saveWav(sound2);
 				placeAllCharts();

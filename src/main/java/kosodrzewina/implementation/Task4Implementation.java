@@ -17,7 +17,7 @@ public class Task4Implementation {
 	 * RUN
 	 */	
 	public static List<double[][]> run(Sound originalSound, int M, int R, int L, int fc,
-			int window, int zeros) {
+			int window, int zeros, int plusUltra) {
 		// Sound parts
 		List<double[]> resultParts = new ArrayList<double[]>();
 		
@@ -81,6 +81,9 @@ public class Task4Implementation {
 			
 			// [4] mult Window and Filter
 			mult = tableMult(windowMag, filterMagnitude);
+			if(plusUltra == 1) {
+				
+			}
 			
 			// [5] back to complex
 			double[] reverseFFT = backToComplex(mult, windowPha);
