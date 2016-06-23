@@ -432,6 +432,12 @@ public class Zadanie4 extends JPanel implements ActionListener{
 				filter.setNewSound(sound2);
 				FileSaver.saveWav(sound2);
 			}else if(filtrBox.getSelectedIndex() == 1){
+				int[] intList = new int[spinnerArray.size()];
+				for(int i = 0; i < spinnerArray.size(); i++) {
+					intList[i] = Integer.parseInt( spinnerArray.get(i).getValue().toString() );
+				}
+				
+				Task4Implementation.for4 = intList;
 				chartData = Task4Implementation.run(sound, M, R, L, 
 						(int)frequencyCut, window, zeroFeed, 0);
 				sound2 = Task4Implementation.globalSound;

@@ -13,6 +13,8 @@ public class Task4Implementation {
 	
 	public static Sound globalSound;
 	
+	public static int[] for4;
+	
 	/**
 	 * RUN
 	 */	
@@ -314,6 +316,13 @@ public class Task4Implementation {
 		return result;
 	}
 
+	/**
+	 * 4
+	 */
+	private static double[] calcFor4() {
+		
+		return null;
+	}
 }
 
 
